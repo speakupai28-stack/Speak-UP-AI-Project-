@@ -1,0 +1,87 @@
+SpeakUP AI — Debate Training Structure
+=======================================
+
+LEVEL 1 — Foundations
+----------------------
+Who it's for: Complete beginners, students new to structured debate
+Goal: Understand how debate works and deliver a basic argument confidently
+
+Topics covered:
+  1. What is debate? (types: Policy, Lincoln-Douglas, Public Forum, Parliamentary)
+  2. The anatomy of an argument — Claim, Warrant, Impact (CWI model)
+  3. Building your first case (affirmative vs. negative)
+  4. How to flow (taking notes during a round)
+  5. Cross-examination basics — what to ask, what to avoid
+  6. Writing and delivering a rebuttal
+  7. Speaking order, timing, and structure of a round
+  8. Practice: Deliver a 2-minute constructive speech
+
+AI Coach focus:
+  - Encouraging and simple language
+  - Step-by-step explanations
+  - Immediate feedback on argument structure
+  - Suggests improvements without overwhelming
+
+Route:  /debate/level-1
+API:    /api/debate/level-1
+
+
+LEVEL 2 — Strategy                                    ← NEXT TO BUILD
+----------------------
+Who it's for: Students who understand basics and want to win rounds
+Goal: Think strategically, adapt to opponents, and run complex arguments
+
+Topics covered:
+  1. Turns — how to flip an opponent's argument against them
+  2. Defensive vs. offensive strategy
+  3. Reading the flow — what's winning and what's not
+  4. Advanced cross-examination (trapping opponents, setting up arguments)
+  5. Block files — preparing responses before the round
+  6. Time allocation — where to spend your speaking time
+  7. Running multiple off-case positions
+  8. Practice: Run a full cross-ex exchange
+
+AI Coach focus:
+  - Strategic thinking prompts
+  - Opponent simulation
+  - Flow analysis and advice
+  - Push back on weak arguments
+
+Route:  /debate/level-2
+API:    /api/debate/level-2
+
+
+LEVEL 3 — Competition
+----------------------
+Who it's for: Experienced debaters preparing for tournaments
+Goal: Perform under pressure, adapt to any judge, and win elimination rounds
+
+Topics covered:
+  1. Tournament structure (prelims, elims, brackets)
+  2. Judge adaptation — reading paradigms, adjusting style
+  3. Theory and procedural arguments
+  4. Kritik debate (K debate) basics
+  5. Speed and clarity — when to spread, when to slow down
+  6. Elimination round pressure management
+  7. Post-round analysis — what to fix before the next round
+  8. Practice: Full timed round simulation
+
+AI Coach focus:
+  - High-level, technical coaching
+  - Brutally honest feedback
+  - Tournament-specific prep
+  - Mindset and confidence coaching
+
+Route:  /debate/level-3
+API:    /api/debate/level-3
+
+
+SHARED API PATTERN
+------------------
+Each level has its own API route that:
+  - Takes: topic, argument, user's speech text, experience level
+  - Returns: structured feedback, suggested improvements, example arguments
+  - Model: claude-opus-4-8
+  - Stored in: /src/app/api/debate/level-[n]/route.ts
+  - Component: /src/components/debate/Level[n].tsx
+  - Page wrapper: /src/app/debate/level-[n]/page.tsx

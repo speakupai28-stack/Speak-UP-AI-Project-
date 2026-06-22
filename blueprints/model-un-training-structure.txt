@@ -1,0 +1,42 @@
+SpeakUP AI — Model UN Training Curriculum
+==========================================
+
+SECTION 1 — Introduction to Model UN
+--------------------------------------
+- What is Model UN and how committees work
+- Understanding the delegate role
+- Rules of procedure basics (motions, points, yields)
+- How resolutions are structured
+- Reading and understanding the study guide
+
+SECTION 2 — Committee Work & Speeches
+--------------------------------------
+- Delivering an opening speech (structure, tone, time limits)
+- Lobbying and forming blocs
+- Writing and sponsoring working papers
+- Merging papers and negotiating language
+- Making and responding to points of information
+- Voting procedure and amendments
+
+SECTION 3 — Research & Position Papers  ← ACTIVE
+--------------------------------------
+- Understanding your country's foreign policy
+- How to research a topic efficiently (this section)
+- Identifying allies, adversaries, and swing votes
+- Citing credible UN and government sources
+- Structuring a position paper (intro, country stance, proposed solutions)
+- Writing policy language that passes
+
+  Sub-feature: Smart Research Assistant
+  - Input: Country, Committee, Topic, Historical Stance (student's prior knowledge)
+  - Output: Step-by-step research roadmap, key sources, allies/adversaries,
+            talking points, position paper tips, smart research strategies
+  - Route: /model-un/research
+  - API:   /api/model-un/research
+
+SECTION 4 — Advanced Delegate Skills (planned)
+--------------------------------------
+- Crisis committee mechanics
+- Writing directives and press releases
+- Chairing a committee
+- Best delegate strategies

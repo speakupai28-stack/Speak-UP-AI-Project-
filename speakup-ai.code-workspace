@@ -1,0 +1,50 @@
+{
+  "folders": [
+    {
+      "name": "📋 Section 1 — Onboarding Survey",
+      "path": "src/app/onboarding"
+    },
+    {
+      "name": "🎯 Section 2 — Debate AI (Level 1: Foundations)",
+      "path": "src/app/debate/level-1"
+    },
+    {
+      "name": "⚔️  Section 2 — Debate AI (Level 2: Competitive)",
+      "path": "src/app/debate/level-2"
+    },
+    {
+      "name": "🏆 Section 2 — Debate AI (Level 3: Elite Lab)",
+      "path": "src/app/debate/level-3"
+    },
+    {
+      "name": "🌍 Section 3 — Model UN Training",
+      "path": "src/app/model-un"
+    },
+    {
+      "name": "🤖 Section 4 — AI Coach",
+      "path": "src/app/coach"
+    },
+    {
+      "name": "🎨 Section 5 — Interface & Components",
+      "path": "src/components"
+    },
+    {
+      "name": "🔌 API Routes",
+      "path": "src/app/api"
+    },
+    {
+      "name": "📐 Blueprints",
+      "path": "blueprints"
+    },
+    {
+      "name": "⚙️  Project Root",
+      "path": "."
+    }
+  ],
+  "settings": {
+    "explorer.sortOrder": "default",
+    "workbench.colorTheme": "Dark Modern",
+    "editor.formatOnSave": true,
+    "typescript.preferences.importModuleSpecifier": "non-relative"
+  }
+}
