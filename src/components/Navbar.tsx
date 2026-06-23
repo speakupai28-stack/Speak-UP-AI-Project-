@@ -6,8 +6,9 @@ import { clsx } from "clsx";
 
 const navLinks = [
   { href: "/", label: "Home" },
-  { href: "/debate/level-1", label: "Debate" },
+  { href: "/debate", label: "Debate" },
   { href: "/model-un", label: "Model UN" },
+  { href: "/public-speaking", label: "Public Speaking" },
   { href: "/coach", label: "Coach" },
 ];
 

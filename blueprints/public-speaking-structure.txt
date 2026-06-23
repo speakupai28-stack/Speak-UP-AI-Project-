@@ -1,0 +1,175 @@
+SpeakUP AI — Public Speaking Training Structure
+================================================
+
+PROGRESSION SYSTEM
+------------------
+Same AI-driven system as Debate:
+  - Student starts at a level based on onboarding experience
+  - AI evaluates after every practice session
+  - Verdict: Advance / Stay / Drop (drop is rare)
+  - Level stored in localStorage under "speakup_speaking_progress"
+  - XP per session: upload=20, event_practice=15, articulation_drill=10
+
+LEVEL 1 — Foundations of Speech
+---------------------------------
+Who it's for: Students who have never formally practiced public speaking
+Goal: Speak clearly, confidently, and with basic structure
+
+Topics covered:
+  1. Why public speaking matters — and why most people fear it
+  2. Articulation basics — enunciation, clarity, filler words (um, uh, like)
+  3. Vocal variety — pace, pitch, pause, and volume
+  4. Basic speech structure — Opening Hook, Body, Closing Call to Action
+  5. Body language fundamentals — posture, eye contact, hand gestures
+  6. Overcoming nervousness — breathing, grounding, reframing anxiety
+  7. The 1-minute rule — how to say something meaningful in 60 seconds
+  8. Practice: Deliver a 60-second self-introduction
+
+AI Coach focus:
+  - Warm and encouraging
+  - Celebrates first attempts
+  - Focuses on one improvement at a time
+  - Never overwhelms with too much feedback
+
+Route:   /public-speaking/level-1
+API:     /api/public-speaking/level-1
+XP per session: 15-20
+
+
+LEVEL 2 — Style & Delivery
+----------------------------
+Who it's for: Students who can speak clearly but want to be compelling
+Goal: Develop a personal speaking style and hold a room's attention
+
+Topics covered:
+  1. Finding your speaking voice — authenticity vs. performance
+  2. Advanced articulation — consonant clarity, vowel precision, rhythm
+  3. Storytelling structure — the problem/journey/resolution arc
+  4. Persuasive techniques — Ethos (credibility), Pathos (emotion), Logos (logic)
+  5. Audience management — reading the room, adapting in real time
+  6. Advanced body language — movement, space, purposeful gestures
+  7. Handling silence — using pauses as power, not weakness
+  8. Practice: 3-minute persuasive speech on a chosen topic
+
+AI Coach focus:
+  - Pushes for more personality and risk-taking
+  - Identifies when delivery feels generic or flat
+  - Challenges students to be more specific and vivid
+  - Compares to what a compelling speaker would do differently
+
+Route:   /public-speaking/level-2
+API:     /api/public-speaking/level-2
+XP per session: 18-25
+
+
+LEVEL 3 — Performance & Events
+--------------------------------
+Who it's for: Students preparing for real speaking events or competitions
+Goal: Deliver polished, event-specific speeches under pressure
+
+Topics covered:
+  1. Adapting to different speaking contexts (formal, casual, competitive)
+  2. Event-specific structure and expectations (see Events section below)
+  3. Advanced persuasion — framing, emotional arc, narrative tension
+  4. Q&A and live audience handling
+  5. Pressure performance — maintaining composure under evaluation
+  6. Vocal stamina for longer speeches
+  7. Speech opening mastery — the first 10 seconds decide everything
+  8. Practice: Full event simulation with judge-level feedback
+
+AI Coach focus:
+  - Evaluates at a real audience/judge standard
+  - Identifies what separates good from great
+  - Focuses on polish, specificity, and originality
+  - Gives competition/event-ready assessment
+
+Route:   /public-speaking/level-3
+API:     /api/public-speaking/level-3
+XP per session: 20-30
+
+
+SPECIFIC EVENTS (available at all levels, difficulty scales)
+-------------------------------------------------------------
+
+  EVENT                     WHAT IT TESTS
+  ---------                 -------------------------
+  Self-Introduction         Clarity, warmth, memorability (60 sec)
+  Class Presentation        Structure, evidence, engagement (3-5 min)
+  Valedictorian Speech      Story, inspiration, personal voice (3-4 min)
+  TEDx-Style Talk           Big idea, narrative arc, delivery (5-7 min)
+  Persuasive Speech         Ethos/Pathos/Logos, call to action (3-5 min)
+  Informative Speech        Clarity, organization, audience awareness (3-5 min)
+  Debate Opening Statement  Framing, argument preview, confidence (2-3 min)
+  Model UN Opening Speech   Formal language, country representation (1-2 min)
+  College Interview Answer  Concise, specific, authentic (60-90 sec)
+  Elevator Pitch            Hook, value prop, ask (30-60 sec)
+
+Each event template includes:
+  - What the judges/audience care about most
+  - A structure guide specific to that event
+  - Example opening lines for inspiration
+  - Common mistakes to avoid
+  - The AI feedback lens calibrated to that event type
+
+
+FEATURES
+--------
+
+1. SPEECH UPLOAD + AI FEEDBACK  ← main feature
+   - Student types or pastes their speech text
+   - AI evaluates across 6 dimensions:
+       Articulation  — clarity, word choice, filler word detection
+       Structure     — opening, body, close, logical flow
+       Style         — personality, originality, voice
+       Delivery      — pace, energy, pausing (inferred from text)
+       Persuasion    — ethos/pathos/logos balance
+       Confidence    — assertiveness, hedging language, conviction
+   - Returns: score per dimension, specific feedback, improved version
+   - Session recorded for weakness tracking
+
+2. EVENT PRACTICE
+   - Student picks an event type
+   - AI provides the event brief (what it is, what's expected)
+   - Student writes their speech for that event
+   - AI evaluates at event-specific standard
+   - Returns judge-style feedback tailored to the event
+
+3. ARTICULATION DRILL (Level 1 & 2 focus)
+   - AI gives a tongue twister or articulation exercise
+   - Student attempts to write out the words in clear, precise form
+   - Checks for clarity, rhythm, and difficult sound combinations
+   - Timed challenge (30 seconds)
+
+4. WEAKNESS DETECTOR (same as debate)
+   - Tracks patterns across sessions
+   - Shows top weaknesses and drills to fix them
+   - Updates after every session
+
+5. AI PROGRESSION JUDGE
+   - After XP hits 100%, AI evaluates sessions
+   - Checks: articulation improvement, structure consistency, style development
+   - Verdict: Advance / Stay / Drop
+   - Explains decision to student
+
+
+COMPONENT STRUCTURE
+-------------------
+  blueprints/public-speaking-structure.txt       ← this file
+  src/app/public-speaking/page.tsx               ← hub (all 3 levels + events)
+  src/app/public-speaking/level-1/page.tsx       ← thin wrapper
+  src/app/public-speaking/level-2/page.tsx       ← thin wrapper
+  src/app/public-speaking/level-3/page.tsx       ← thin wrapper
+  src/components/speaking/SpeakingHub.tsx        ← level selector
+  src/components/speaking/SpeakingArena.tsx      ← tabbed shell (like DebateArena)
+  src/components/speaking/Level1.tsx             ← lessons
+  src/components/speaking/Level2.tsx             ← lessons
+  src/components/speaking/Level3.tsx             ← lessons
+  src/components/speaking/SpeechUpload.tsx       ← upload + feedback feature
+  src/components/speaking/EventPractice.tsx      ← event-specific practice
+  src/components/speaking/ArticulationDrill.tsx  ← timed articulation drill
+  src/components/speaking/WeaknessDetector.tsx   ← weakness tracking
+  src/components/speaking/ProgressBar.tsx        ← speaking progress bar
+  src/app/api/public-speaking/feedback/route.ts  ← speech upload API
+  src/app/api/public-speaking/event/route.ts     ← event practice API
+  src/app/api/public-speaking/progress/route.ts  ← progression AI API
+  src/lib/speakingProgress.ts                    ← progress utility (like debate)

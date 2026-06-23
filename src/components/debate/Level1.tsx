@@ -56,14 +56,14 @@ const LESSONS = [
   {
     id: 3,
     icon: Swords,
-    title: "Affirmative vs. Negative",
+    title: "Sides: AFF/NEG and Pro/Con",
     color: "bg-blue-500",
-    concept: "In every debate round you're assigned a side. Your job is to argue that side — even if you personally disagree.",
+    concept: "Every debate round has two sides. The names differ by format — but the logic is the same: one side supports the resolution, one opposes it.",
     sides: [
-      { name: "Affirmative (AFF)", color: "text-emerald-400", desc: "Supports the resolution. Goes first. Has the burden of proof — must show the resolution is true." },
-      { name: "Negative (NEG)", color: "text-rose-400", desc: "Opposes the resolution. Responds to the AFF. Has to prove the AFF is wrong or doesn't meet their burden." },
+      { name: "Affirmative / Pro", color: "text-emerald-400", desc: "Supports the resolution. Goes first. Has the burden of proof — must show the resolution is true. Called 'Affirmative' (AFF) in LD and Policy; called 'Pro' in Public Forum." },
+      { name: "Negative / Con", color: "text-rose-400", desc: "Opposes the resolution. Responds to the AFF/Pro. Must prove the other side is wrong or hasn't met their burden. Called 'Negative' (NEG) in LD and Policy; called 'Con' in Public Forum." },
     ],
-    takeaway: "Affirmative starts and must prove the resolution. Negative tears down that proof.",
+    takeaway: "LD & Policy use Affirmative/Negative. Public Forum uses Pro/Con. Parliamentary uses Government/Opposition.",
   },
   {
     id: 4,
@@ -108,16 +108,49 @@ const LESSONS = [
     icon: Clock,
     title: "Round Structure & Speaking Order",
     color: "bg-amber-500",
-    concept: "Every debate format has a set speaking order. Here's how a basic Public Forum round works:",
-    order: [
-      { speech: "1AC — First Affirmative Constructive", time: "4 min", who: "AFF", desc: "AFF presents their case" },
-      { speech: "Cross-Ex", time: "2 min", who: "NEG questions AFF", desc: "" },
-      { speech: "1NC — First Negative Constructive", time: "4 min", who: "NEG", desc: "NEG presents their case + rebuttals" },
-      { speech: "Cross-Ex", time: "2 min", who: "AFF questions NEG", desc: "" },
-      { speech: "Summary Speeches", time: "3 min each", who: "Both", desc: "Narrow the debate to key issues" },
-      { speech: "Final Focus", time: "2 min each", who: "Both", desc: "Why your side wins the round" },
+    concept: "Every format has its own speech order. These are the three main NSDA formats — know which one your tournament uses.",
+    formats: [
+      {
+        name: "Public Forum (PF)",
+        speeches: [
+          { speech: "Pro Constructive", time: "4 min", desc: "Pro presents their case" },
+          { speech: "Con Constructive", time: "4 min", desc: "Con presents their case" },
+          { speech: "Crossfire", time: "3 min", desc: "1st speakers question each other" },
+          { speech: "Pro Rebuttal", time: "4 min", desc: "Pro attacks Con's case" },
+          { speech: "Con Rebuttal", time: "4 min", desc: "Con attacks Pro's case" },
+          { speech: "Crossfire", time: "3 min", desc: "1st speakers again" },
+          { speech: "Pro Summary", time: "3 min", desc: "Pro narrows to best arguments" },
+          { speech: "Con Summary", time: "3 min", desc: "Con narrows to best arguments" },
+          { speech: "Grand Crossfire", time: "3 min", desc: "All 4 speakers" },
+          { speech: "Pro Final Focus", time: "2 min", desc: "Pro's last word" },
+          { speech: "Con Final Focus", time: "2 min", desc: "Con's last word" },
+        ],
+      },
+      {
+        name: "Lincoln-Douglas (LD)",
+        speeches: [
+          { speech: "1AC — 1st Affirmative Constructive", time: "6 min", desc: "AFF presents value, criterion, contentions" },
+          { speech: "CX", time: "3 min", desc: "NEG questions AFF" },
+          { speech: "1NC — 1st Negative Constructive", time: "7 min", desc: "NEG presents case + attacks AFF" },
+          { speech: "CX", time: "3 min", desc: "AFF questions NEG" },
+          { speech: "1AR — 1st Affirmative Rebuttal", time: "4 min", desc: "AFF rebuilds and attacks NEG" },
+          { speech: "2NR — 2nd Negative Rebuttal", time: "6 min", desc: "NEG crystallises and collapses" },
+          { speech: "2AR — 2nd Affirmative Rebuttal", time: "3 min", desc: "AFF's final word" },
+        ],
+      },
+      {
+        name: "Policy (CX)",
+        speeches: [
+          { speech: "1AC", time: "9 min", desc: "AFF team reads their plan" },
+          { speech: "CX", time: "3 min", desc: "NEG questions" },
+          { speech: "1NC", time: "9 min", desc: "NEG runs off-case and on-case arguments" },
+          { speech: "CX", time: "3 min", desc: "AFF questions" },
+          { speech: "2AC", time: "9 min", desc: "AFF extends and answers" },
+          { speech: "CX → 2NC → CX → 1NR → 1AR → 2NR → 2AR", time: "varies", desc: "Rebuttals and final speeches" },
+        ],
+      },
     ],
-    takeaway: "Know your speech times. Running over or under hurts your credibility.",
+    takeaway: "Know your format before you walk in the room. PF uses Pro/Con. LD and Policy use AFF/NEG.",
   },
   {
     id: 8,
@@ -263,17 +296,24 @@ function LessonCard({ lesson, index }: { lesson: typeof LESSONS[0]; index: numbe
             </div>
           )}
 
-          {/* Speaking order (Lesson 7) */}
-          {"order" in lesson && (
-            <div className="flex flex-col gap-2">
-              {(lesson as { order: { speech: string; time: string; who: string; desc: string }[] }).order.map((o, i) => (
-                <div key={i} className="flex items-center gap-3 rounded-xl border border-[#1E293B] bg-[#0A0F1E] p-3">
-                  <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-[#1a2236] text-xs font-bold text-[#94A3B8]">{i + 1}</span>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-semibold text-[#F1F5F9]">{o.speech}</p>
-                    {o.desc && <p className="text-xs text-[#94A3B8]">{o.desc}</p>}
+          {/* Round structure by format (Lesson 7) */}
+          {"formats" in lesson && (
+            <div className="flex flex-col gap-5">
+              {(lesson as { formats: { name: string; speeches: { speech: string; time: string; desc: string }[] }[] }).formats.map((fmt) => (
+                <div key={fmt.name}>
+                  <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-[#6366F1]">{fmt.name}</p>
+                  <div className="flex flex-col gap-1.5">
+                    {fmt.speeches.map((s, i) => (
+                      <div key={i} className="flex items-center gap-3 rounded-xl border border-[#1E293B] bg-[#0A0F1E] p-3">
+                        <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-[#1a2236] text-xs font-bold text-[#94A3B8]">{i + 1}</span>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-semibold text-[#F1F5F9]">{s.speech}</p>
+                          {s.desc && <p className="text-xs text-[#94A3B8]">{s.desc}</p>}
+                        </div>
+                        <span className="shrink-0 rounded-full bg-[#6366F1]/20 px-2 py-0.5 text-xs text-[#6366F1]">{s.time}</span>
+                      </div>
+                    ))}
                   </div>
-                  <span className="shrink-0 rounded-full bg-[#6366F1]/20 px-2 py-0.5 text-xs text-[#6366F1]">{o.time}</span>
                 </div>
               ))}
             </div>

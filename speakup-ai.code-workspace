@@ -21,7 +21,11 @@
       "path": "src/app/model-un"
     },
     {
-      "name": "🤖 Section 4 — AI Coach",
+      "name": "🎤 Section 4 — Public Speaking",
+      "path": "src/app/public-speaking"
+    },
+    {
+      "name": "🤖 Section 5 — AI Coach",
       "path": "src/app/coach"
     },
     {
