@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { anthropic } from "@/lib/anthropic";
+import { getModel, parseJSON } from "@/lib/gemini";
+import { CURRICULUM_MAP } from "@/lib/curriculum";
 import type { ProgressionDecision } from "@/lib/types";
 
 export async function POST(req: NextRequest) {
@@ -16,14 +17,18 @@ export async function POST(req: NextRequest) {
     .map((s, i) => `Session ${i + 1}: ${s.type}, score ${s.score}/10, weaknesses: ${s.weaknesses.join(", ")}`)
     .join("\n");
 
-  const message = await anthropic.messages.create({
-    model: "claude-opus-4-8",
-    max_tokens: 512,
-    system: `You are a debate progression evaluator. Based on a student's session history, decide whether they should advance to the next level, stay, or drop back to Level 1. Be fair but demanding — advancement should reflect genuine understanding. Dropping to Level 1 is rare and only for students showing fundamental misunderstanding. Always respond with valid JSON only.`,
-    messages: [
-      {
-        role: "user",
-        content: `Evaluate this student's readiness to progress.
+  const nextLevel = Math.min(currentLevel + 1, 3);
+
+  const model = getModel(
+    `You are a debate progression evaluator for SpeakUP AI. You know the full curriculum and can reference specific lessons and features in your feedback.
+
+${CURRICULUM_MAP}
+
+Decide whether the student should advance to Level ${nextLevel}, stay at Level ${currentLevel}, or drop to Level 1. Be fair but demanding. Dropping is rare — only for fundamental misunderstanding. When explaining your decision, reference specific lessons or features by name. Always respond with valid JSON only — no markdown, no code fences.`
+  );
+
+  const result = await model.generateContent(
+    `Evaluate this student's readiness to progress in the Debate section.
 
 CURRENT LEVEL: ${currentLevel}
 RECENT SESSIONS:
@@ -31,25 +36,16 @@ ${sessionSummary}
 
 TOP WEAKNESSES: ${weaknessSummary || "None recorded yet"}
 
-Based on their scores, weaknesses, and session types — should they advance to Level ${Math.min(currentLevel + 1, 3)}, stay at Level ${currentLevel}, or drop to Level 1?
-
 Return JSON:
 {
-  "verdict": "advance" | "stay" | "drop",
-  "reasoning": "<2-3 sentences explaining the decision clearly to the student>",
+  "verdict": "advance" or "stay" or "drop",
+  "reasoning": "<2-3 sentences explaining the decision — reference specific lessons or features by name>",
   "strengths": ["<2-3 things they demonstrated well>"],
-  "gaps": ["<1-2 specific gaps that need work>"],
-  "nextFocus": "<the single most important thing to focus on next>"
-}`,
-      },
-    ],
-  });
+  "gaps": ["<1-2 specific gaps — reference the lesson or feature that covers this>"],
+  "nextFocus": "<one specific action: name the exact feature or lesson they should do next>"
+}`
+  );
 
-  const textBlock = message.content.find((b) => b.type === "text");
-  if (!textBlock || textBlock.type !== "text") {
-    return NextResponse.json({ error: "No decision generated" }, { status: 500 });
-  }
-
-  const decision: ProgressionDecision = JSON.parse(textBlock.text);
+  const decision = parseJSON<ProgressionDecision>(result.response.text());
   return NextResponse.json(decision);
 }

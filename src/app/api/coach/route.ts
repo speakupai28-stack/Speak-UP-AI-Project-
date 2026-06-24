@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { anthropic } from "@/lib/anthropic";
+import { getModel } from "@/lib/gemini";
+import { CURRICULUM_MAP } from "@/lib/curriculum";
 
 const FOCUS_LABELS: Record<string, string> = {
   debate: "Competitive Debate",
@@ -16,7 +17,6 @@ const GOAL_LABELS: Record<string, string> = {
 
 export async function POST(req: NextRequest) {
   const { messages, profile } = await req.json();
-
   const { name, experience, focus, goal, aiProfile } = profile;
 
   const focusAreas = (focus as string[]).map((f: string) => FOCUS_LABELS[f] ?? f).join(", ");
@@ -24,35 +24,41 @@ export async function POST(req: NextRequest) {
 
   const systemPrompt = `You are a personal coach for ${name}, a ${experience}-level student focused on: ${focusAreas}. Their main goal is ${goalContext}.
 
-Here is what you already know about ${name} from their onboarding:
+WHAT YOU KNOW ABOUT ${name.toUpperCase()}:
 - Coaching style they need: ${aiProfile?.coachingStyle ?? "personalized and encouraging"}
 - Their weekly goal: ${aiProfile?.weeklyGoal ?? "improve their skills"}
 - Top skills to build: ${(aiProfile?.topFocusSkills as string[])?.join(", ") ?? "core communication skills"}
-- Key insight 1: ${(aiProfile?.personalizedInsights as string[])?.[0] ?? ""}
-- Key insight 2: ${(aiProfile?.personalizedInsights as string[])?.[1] ?? ""}
+- Key insight: ${(aiProfile?.personalizedInsights as string[])?.[0] ?? ""}
 
-Your role:
-- You are ONLY a coach for their chosen areas: ${focusAreas}. Do not give generic advice — everything you say must connect directly to their specific focus areas and goals.
-- Speak to ${name} by name occasionally to make it feel personal.
-- Match their level: ${experience === "beginner" ? "explain things simply and encourage every attempt" : experience === "intermediate" ? "push for strategic thinking and challenge weak spots" : "be direct, technical, and hold them to a high standard"}.
-- When they ask for help with a specific skill, give them a concrete drill, example, or framework they can use immediately.
-- When they share something they wrote or said, give specific, actionable feedback — not generic praise.
-- Keep responses conversational and focused — 3-5 sentences unless they ask for more detail.
-- You remember everything from this conversation. Build on previous exchanges.
-- If they ask about something outside your coaching areas, gently redirect: "That's outside what I coach, but for your ${focusAreas} work..."`;
+YOUR COACHING RULES:
+- Only coach in their chosen areas: ${focusAreas}. Gently redirect anything outside this.
+- Speak to ${name} by name occasionally to make it personal.
+- Match their level: ${experience === "beginner" ? "explain simply, encourage every attempt, focus on one thing at a time" : experience === "intermediate" ? "push for strategic thinking, challenge weak spots, ask follow-up questions" : "be direct, technical, hold them to a high standard, no sugarcoating"}
+- When they ask what to work on, reference SPECIFIC features and sections from the curriculum below.
+- When they share something they wrote or said, give specific actionable feedback — not generic praise.
+- Keep responses conversational — 3-5 sentences unless they ask for more.
+- Always end with one specific action they can take right now.
 
-  const formattedMessages = (messages as { role: string; content: string }[]).map((m) => ({
-    role: m.role as "user" | "assistant",
-    content: m.content,
+HERE IS THE FULL APP CURRICULUM SO YOU CAN MAKE SPECIFIC RECOMMENDATIONS:
+${CURRICULUM_MAP}
+
+EXAMPLE OF GOOD COACHING (what you should sound like):
+Student: "I'm struggling with rebuttals"
+You: "Rebuttals are one of the hardest skills to build because you're thinking on your feet. The fastest way to improve is the Rebuttal Trainer in your Debate section — it gives you 90 seconds to attack a live argument, which forces you to think quickly. Do 3 rounds of that today and focus on starting every rebuttal by naming the exact argument you're attacking before you counter it."`;
+
+  const model = getModel(systemPrompt);
+
+  const allMessages = messages as { role: string; content: string }[];
+  const history = allMessages.slice(0, -1).map((m) => ({
+    role: m.role === "user" ? "user" as const : "model" as const,
+    parts: [{ text: m.content }],
   }));
 
-  const message = await anthropic.messages.create({
-    model: "claude-opus-4-8",
-    max_tokens: 512,
-    system: systemPrompt,
-    messages: formattedMessages,
-  });
+  const lastMessage = allMessages.at(-1);
+  const userText = lastMessage?.content ?? "";
 
-  const textBlock = message.content.find((b) => b.type === "text");
-  return NextResponse.json({ response: textBlock?.type === "text" ? textBlock.text : "" });
+  const chat = model.startChat({ history });
+  const result = await chat.sendMessage(userText);
+
+  return NextResponse.json({ response: result.response.text() });
 }
