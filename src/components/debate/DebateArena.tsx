@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { BookOpen, Swords, Timer, FileText, Target, Mic } from "lucide-react";
 import { Badge } from "@/components/ui/Badge";
 import { Tabs, TabPanel, type TabItem } from "@/components/ui/Tabs";
@@ -41,7 +41,14 @@ export default function DebateArena({
   SpeechComponent,
 }: DebateArenaProps) {
   const [tab, setTab] = useState<Tab>(defaultTab);
-  const [level, setLevel] = useState<DebateLevel>(() => getProgress().level);
+  const [level, setLevel] = useState<DebateLevel>(1);
+
+  // localStorage is client-only; reading it in a lazy initializer would
+  // desync the server-rendered HTML from the client's first paint.
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setLevel(getProgress().level);
+  }, []);
 
   return (
     <div className="mx-auto max-w-4xl px-6 py-6">

@@ -1,6 +1,5 @@
 "use client";
 
-import { useState } from "react";
 import { clsx } from "clsx";
 import {
   MessageSquare,
@@ -13,6 +12,7 @@ import {
 } from "lucide-react";
 import { Card } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
+import { useClientValue } from "@/lib/useClientValue";
 import { ButtonLink } from "@/components/ui/Button";
 
 const LEVELS = [
@@ -92,7 +92,7 @@ function readExperience(): string | null {
 }
 
 export default function DebateHub() {
-  const [experience] = useState<string | null>(() => readExperience());
+  const experience = useClientValue(readExperience, null);
 
   const recommendedLevel =
     experience === "advanced" ? "level-3"

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { clsx } from "clsx";
 import {
@@ -95,9 +95,19 @@ function readUser(): UserData | null {
   }
 }
 
+const EMPTY_STATS = { sessions: 0, streak: 0, avgScore: null as number | null, focusAreasTracked: 0 };
+
 export default function Dashboard() {
-  const [user] = useState<UserData | null>(() => readUser());
-  const [stats] = useState(() => {
+  const [user, setUser] = useState<UserData | null>(null);
+  const [loaded, setLoaded] = useState(false);
+  const [stats, setStats] = useState(EMPTY_STATS);
+
+  // localStorage is client-only; reading it in a lazy initializer would
+  // desync the server-rendered HTML from the client's first paint.
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setUser(readUser());
+
     const debate = getProgress();
     const speaking = getSpeakingProgress();
     const allSessions = [...debate.sessions, ...speaking.sessions];
@@ -106,16 +116,16 @@ export default function Dashboard() {
       ...Object.keys(debate.weaknesses),
       ...Object.keys(speaking.weaknesses),
     ]);
-
-    return {
+    setStats({
       sessions: allSessions.length,
       streak: computeStreak(allSessions.map((s) => s.date)),
       avgScore: scores.length > 0 ? scores.reduce((a, b) => a + b, 0) / scores.length : null,
       focusAreasTracked: weaknessLabels.size,
-    };
-  });
+    });
+    setLoaded(true);
+  }, []);
 
-  if (!user) {
+  if (loaded && !user) {
     return (
       <div className="flex min-h-[calc(100vh-65px)] flex-col items-center justify-center gap-4 px-4 text-center">
         <Target size={40} className="text-maroon" />
@@ -125,6 +135,8 @@ export default function Dashboard() {
       </div>
     );
   }
+
+  if (!user) return null;
 
   const { name, experience, focus, goal, profile } = user;
   const badge = EXPERIENCE_BADGE[experience];

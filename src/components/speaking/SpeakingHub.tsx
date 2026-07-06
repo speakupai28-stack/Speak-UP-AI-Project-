@@ -1,11 +1,11 @@
 "use client";
 
-import { useState } from "react";
 import { Mic2, ChevronRight, CheckCircle2, Lock } from "lucide-react";
 import { Card } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
 import { ButtonLink } from "@/components/ui/Button";
 import { getSpeakingProgress } from "@/lib/speakingProgress";
+import { useClientValue } from "@/lib/useClientValue";
 
 const LEVELS = [
   {
@@ -32,7 +32,7 @@ const LEVELS = [
 ];
 
 export default function SpeakingHub() {
-  const [currentLevel] = useState(() => getSpeakingProgress().level);
+  const currentLevel = useClientValue(() => getSpeakingProgress().level, 1);
 
   return (
     <div className="mx-auto max-w-5xl px-6 py-10">

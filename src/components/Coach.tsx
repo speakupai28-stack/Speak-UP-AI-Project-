@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { clsx } from "clsx";
 import { Send, Sparkles, MessageSquare, Globe2, Mic2, Target, ChevronRight } from "lucide-react";
 import Link from "next/link";
@@ -50,19 +50,29 @@ function readUser(): UserData | null {
 }
 
 export default function Coach() {
-  const [user] = useState<UserData | null>(() => readUser());
-  const [messages, setMessages] = useState<ChatMessage[]>(() => {
-    const u = readUser();
-    if (!u) return [];
-    const greeting =
-      u?.profile?.greeting ?? `Hey ${u?.name ?? ""}! I'm your personal coach. What are we working on today?`;
-    return [{ role: "assistant", content: greeting }];
-  });
+  const [user, setUser] = useState<UserData | null>(null);
+  const [loaded, setLoaded] = useState(false);
+  const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
   const [started, setStarted] = useState(false);
   const bottomRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
+
+  // localStorage is client-only; reading it in a lazy initializer would
+  // desync the server-rendered HTML from the client's first paint.
+  useEffect(() => {
+    const u = readUser();
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setUser(u);
+    if (u) {
+      const greeting =
+        u.profile?.greeting ?? `Hey ${u.name ?? ""}! I'm your personal coach. What are we working on today?`;
+      setMessages([{ role: "assistant", content: greeting }]);
+    }
+    setLoaded(true);
+  }, []);
+
   const streamedTextRef = useRef("");
 
   async function send(text?: string) {
@@ -122,7 +132,7 @@ export default function Coach() {
     }
   }
 
-  if (!user) {
+  if (loaded && !user) {
     return (
       <div className="flex min-h-[calc(100vh-65px)] flex-col items-center justify-center gap-4 px-4 text-center">
         <Target size={40} className="text-maroon" />
@@ -132,6 +142,8 @@ export default function Coach() {
       </div>
     );
   }
+
+  if (!user) return null;
 
   const focusAreas = (user.focus ?? []).filter((f) => FOCUS_META[f]);
   const starterPrompts = focusAreas.flatMap((f) => (STARTER_PROMPTS_BY_FOCUS[f] ?? []).slice(0, 2)).slice(0, 4);

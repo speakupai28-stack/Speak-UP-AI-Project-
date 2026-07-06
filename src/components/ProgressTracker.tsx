@@ -50,7 +50,7 @@ export function ProgressTracker<P extends BaseProgress, D extends BaseDecision =
   getTopWeaknesses,
   onLevelChange,
 }: ProgressTrackerProps<P>) {
-  const [progress, setProgress] = useState<P | null>(() => getProgress());
+  const [progress, setProgress] = useState<P | null>(null);
   const [evaluating, setEvaluating] = useState(false);
   const [decision, setDecision] = useState<D | null>(null);
   const [showDecision, setShowDecision] = useState(false);
@@ -83,6 +83,14 @@ export function ProgressTracker<P extends BaseProgress, D extends BaseDecision =
     },
     [evaluateEndpoint]
   );
+
+  // localStorage is client-only; reading it in a lazy initializer would
+  // desync the server-rendered HTML from the client's first paint.
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setProgress(getProgress());
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   useEffect(() => {
     const interval = setInterval(() => {

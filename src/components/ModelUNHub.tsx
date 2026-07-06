@@ -1,6 +1,5 @@
 "use client";
 
-import { useState } from "react";
 import {
   Globe2,
   ChevronRight,
@@ -14,6 +13,7 @@ import {
 import { Card } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
 import { ButtonLink } from "@/components/ui/Button";
+import { useClientValue } from "@/lib/useClientValue";
 
 const SECTIONS = [
   {
@@ -103,7 +103,7 @@ function readExperience(): string | null {
 }
 
 export default function ModelUNHub() {
-  const [experience] = useState<string | null>(() => readExperience());
+  const experience = useClientValue(readExperience, null);
 
   const recommendedId =
     experience === "advanced" ? "section-3"

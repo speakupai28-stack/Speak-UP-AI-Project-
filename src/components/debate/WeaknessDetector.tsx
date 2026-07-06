@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Target, TrendingUp, Zap, RefreshCw } from "lucide-react";
 import { getProgress, getTopWeaknesses, getRecentSessions } from "@/lib/progress";
 import type { DebateProgress } from "@/lib/types";
@@ -22,7 +22,14 @@ function getDrillForWeakness(weakness: string): string {
 }
 
 export default function WeaknessDetector() {
-  const [progress, setProgress] = useState<DebateProgress | null>(() => getProgress());
+  const [progress, setProgress] = useState<DebateProgress | null>(null);
+
+  // localStorage is client-only; reading it in a lazy initializer would
+  // desync the server-rendered HTML from the client's first paint.
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setProgress(getProgress());
+  }, []);
 
   if (!progress) return null;
 
