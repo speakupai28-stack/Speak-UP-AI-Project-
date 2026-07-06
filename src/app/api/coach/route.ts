@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest } from "next/server";
 import { anthropic } from "@/lib/anthropic";
 
 const FOCUS_LABELS: Record<string, string> = {
@@ -46,13 +46,28 @@ Your role:
     content: m.content,
   }));
 
-  const message = await anthropic.messages.create({
+  const anthropicStream = anthropic.messages.stream({
     model: "claude-opus-4-8",
     max_tokens: 512,
     system: systemPrompt,
     messages: formattedMessages,
   });
 
-  const textBlock = message.content.find((b) => b.type === "text");
-  return NextResponse.json({ response: textBlock?.type === "text" ? textBlock.text : "" });
+  const encoder = new TextEncoder();
+  const body = new ReadableStream({
+    start(controller) {
+      anthropicStream.on("text", (textDelta) => {
+        controller.enqueue(encoder.encode(textDelta));
+      });
+      anthropicStream.on("end", () => controller.close());
+      anthropicStream.on("error", (err) => controller.error(err));
+    },
+    cancel() {
+      anthropicStream.abort();
+    },
+  });
+
+  return new Response(body, {
+    headers: { "Content-Type": "text/plain; charset=utf-8" },
+  });
 }
