@@ -2,7 +2,7 @@ import Link from "next/link";
 import { clsx } from "clsx";
 import { Loader2 } from "lucide-react";
 
-export type ButtonVariant = "primary" | "secondary" | "ghost";
+export type ButtonVariant = "primary" | "secondary" | "ghost" | "inverse";
 export type ButtonSize = "sm" | "md" | "lg";
 
 const variantClasses: Record<ButtonVariant, string> = {
@@ -10,6 +10,10 @@ const variantClasses: Record<ButtonVariant, string> = {
   secondary:
     "border border-ink/25 text-ink bg-transparent hover:border-ink hover:bg-ink/5",
   ghost: "text-ink-soft hover:text-ink hover:bg-ink/5",
+  // For use on dark/ink surfaces (e.g. the featured pricing card) — do not
+  // combine with primary/secondary via className overrides, since conflicting
+  // utilities for the same property don't resolve by source order.
+  inverse: "bg-paper text-ink hover:bg-paper-dim",
 };
 
 const sizeClasses: Record<ButtonSize, string> = {

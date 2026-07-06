@@ -77,12 +77,9 @@ export function PricingCard({
 
       <ButtonLink
         href={ctaHref}
-        variant={featured ? "primary" : "secondary"}
+        variant={featured ? "inverse" : "secondary"}
         size="lg"
-        className={clsx(
-          "mt-7 w-full",
-          featured && "bg-paper text-ink hover:bg-paper-dim"
-        )}
+        className="mt-7 w-full"
       >
         {ctaLabel}
       </ButtonLink>

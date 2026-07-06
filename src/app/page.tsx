@@ -1,172 +1,348 @@
 import Link from "next/link";
-import { MessageSquare, Globe2, Mic2, ChevronRight, Trophy, Zap, Star } from "lucide-react";
+import {
+  MessageSquare,
+  Globe2,
+  Mic2,
+  Briefcase,
+  ChevronRight,
+  CreditCard,
+  GraduationCap,
+  Check,
+} from "lucide-react";
+import { ButtonLink } from "@/components/ui/Button";
+import { Section } from "@/components/ui/Section";
+import { Badge } from "@/components/ui/Badge";
+import { PricingCard } from "@/components/ui/PricingCard";
+import { Reveal, StaggerGroup, StaggerItem } from "@/components/motion/Reveal";
+import { CountUp } from "@/components/motion/CountUp";
+import { HeroTranscript } from "@/components/marketing/HeroTranscript";
 
-const FEATURES = [
+const DISCIPLINES = [
   {
     icon: MessageSquare,
     title: "Debate",
-    description: "Master argument structure, strategy, and competitive debate across three progressive levels.",
+    description:
+      "Master argument structure, cross-ex, and competitive strategy across three progressive levels.",
     href: "/debate",
-    gradient: "from-indigo-500 to-purple-600",
-    levels: ["Level 1 — Foundations", "Level 2 — Strategy", "Level 3 — Competition"],
   },
   {
     icon: Globe2,
     title: "Model UN",
-    description: "Research your country, write position papers, and lead committee sessions with confidence.",
+    description:
+      "Research your country, write position papers, and negotiate blocs with committee-ready confidence.",
     href: "/model-un",
-    gradient: "from-blue-500 to-cyan-600",
-    levels: ["Research & Position Papers", "Committee Speeches", "Negotiations"],
   },
   {
     icon: Mic2,
-    title: "Coach",
-    description: "Build your delivery, presence, and persuasion skills with personalized feedback on every speech.",
-    href: "/coach",
-    gradient: "from-amber-500 to-orange-600",
-    levels: ["Delivery & Clarity", "Structure & Flow", "Confidence & Presence"],
+    title: "Public Speaking",
+    description:
+      "Build pacing, clarity, and presence with feedback on every speech — from self-intros to TEDx talks.",
+    href: "/public-speaking",
+  },
+  {
+    icon: Briefcase,
+    title: "Real-World Track",
+    description:
+      "Job interviews, elevator pitches, and advocacy — the same coaching engine applied beyond the tournament.",
+    href: "/public-speaking",
   },
 ];
 
-const STATS = [
-  { value: "3", label: "Debate Levels", icon: Trophy },
-  { value: "4", label: "Model UN Sections", icon: Globe2 },
-  { value: "100%", label: "Personalized", icon: Star },
-  { value: "24/7", label: "Available", icon: Zap },
+const STEPS = [
+  {
+    step: "01",
+    title: "Tell us where you're starting",
+    desc: "A two-minute survey on your experience and goals builds your first learning plan.",
+  },
+  {
+    step: "02",
+    title: "Work through structured lessons",
+    desc: "Levels built for your stage — from first arguments to tournament-grade strategy.",
+  },
+  {
+    step: "03",
+    title: "Practice live with your coach",
+    desc: "Cross-ex, speeches, committee sessions — your coach responds in real time.",
+  },
+  {
+    step: "04",
+    title: "See your skill score",
+    desc: "Every session ends with a scored breakdown and exactly what to fix next.",
+  },
+];
+
+const PRICING = [
+  {
+    name: "Free",
+    price: "$0",
+    cadence: "/mo",
+    description: "Try one discipline with basic feedback.",
+    features: [
+      "5 sessions per month",
+      "One discipline of your choice",
+      "Basic AI feedback",
+    ],
+    ctaLabel: "Start for free",
+    ctaHref: "/onboarding",
+  },
+  {
+    name: "Student Pro",
+    price: "$9.99",
+    cadence: "/mo",
+    description: "Full access for one student, every discipline.",
+    features: [
+      "Unlimited sessions",
+      "All disciplines + real-world track",
+      "Progress tracking across levels",
+    ],
+    ctaLabel: "Get Student Pro",
+    ctaHref: "/onboarding",
+    featured: true,
+  },
+  {
+    name: "School License",
+    price: "$7",
+    cadence: "/student/mo",
+    description: "Everything in Pro, built for a classroom.",
+    features: [
+      "Everything in Student Pro",
+      "Teacher dashboard",
+      "Class assignments",
+      "Bulk reporting",
+    ],
+    ctaLabel: "Bring it to your school",
+    ctaHref: "/onboarding",
+  },
+  {
+    name: "Competition Prep",
+    price: "$29",
+    cadence: "/mo",
+    description: "Pro, tuned for tournament season.",
+    features: [
+      "Everything in Student Pro",
+      "Tournament simulation",
+      "Case-building tools",
+      "Judge-style feedback",
+    ],
+    ctaLabel: "Prep for competition",
+    ctaHref: "/onboarding",
+  },
 ];
 
 export default function HomePage() {
   return (
     <div className="flex flex-col">
-      {/* Hero */}
-      <section className="hero-gradient relative flex min-h-[90vh] flex-col items-center justify-center px-6 text-center">
-        <div className="absolute inset-0 overflow-hidden">
-          <div className="absolute left-1/4 top-1/4 h-96 w-96 rounded-full bg-indigo-500/10 blur-3xl" />
-          <div className="absolute right-1/4 bottom-1/4 h-96 w-96 rounded-full bg-purple-500/10 blur-3xl" />
-        </div>
-
-        <div className="relative z-10 max-w-4xl">
-          <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-[#6366F1]/30 bg-[#6366F1]/10 px-4 py-1.5">
-            <Zap size={12} className="text-[#6366F1]" />
-            <span className="text-xs font-semibold text-[#6366F1]">Personalized coaching for every student</span>
+      {/* 1 — Hero */}
+      <Section width="wide" className="pt-20 sm:pt-28">
+        <div className="grid items-center gap-14 lg:grid-cols-[1.1fr_0.9fr]">
+          <div>
+            <Badge variant="maroon" className="mb-6">
+              Personalized coaching for every student
+            </Badge>
+            <h1 className="font-display text-display-1 font-semibold tracking-tight text-ink">
+              Speak up.
+              <br />
+              Stand out.
+            </h1>
+            <p className="mt-6 max-w-xl text-lg leading-relaxed text-ink-soft">
+              Your always-on coach for debate, Model UN, and public speaking —
+              live rebuttals, judge-style feedback, and a skill score after
+              every session.
+            </p>
+            <div className="mt-9 flex flex-col gap-3 sm:flex-row sm:items-center">
+              <ButtonLink href="/onboarding" size="lg">
+                Get Started — It&apos;s Free
+                <ChevronRight size={16} />
+              </ButtonLink>
+              <ButtonLink href="#pricing" variant="secondary" size="lg">
+                See pricing
+              </ButtonLink>
+            </div>
+            <p className="mt-4 flex items-center gap-1.5 text-xs text-stone">
+              <CreditCard size={13} /> No credit card required
+            </p>
           </div>
 
-          <h1 className="mb-6 text-5xl font-bold leading-tight tracking-tight text-[#F1F5F9] sm:text-6xl lg:text-7xl">
-            Speak up.{" "}
-            <span className="text-gradient">Stand out.</span>
-          </h1>
-
-          <p className="mx-auto mb-10 max-w-2xl text-lg leading-relaxed text-[#94A3B8] sm:text-xl">
-            Your personal coach for debate, Model UN, and public speaking.
-            Learn the skills. Practice with feedback. Win the room.
-          </p>
-
-          <div className="flex flex-col items-center gap-4 sm:flex-row sm:justify-center">
-            <Link
-              href="/onboarding"
-              className="animate-pulse-glow flex items-center gap-2 rounded-full bg-[#6366F1] px-8 py-4 text-base font-semibold text-white transition-colors hover:bg-[#4F46E5]"
-            >
-              Get Started — It&apos;s Free
-              <ChevronRight size={16} />
-            </Link>
-            <Link
-              href="/debate"
-              className="flex items-center gap-2 rounded-full border border-[#1E293B] px-8 py-4 text-base font-medium text-[#94A3B8] transition-colors hover:border-[#6366F1]/50 hover:text-[#F1F5F9]"
-            >
-              Explore Sections
-            </Link>
+          <div className="flex justify-center lg:justify-end">
+            <HeroTranscript />
           </div>
         </div>
-      </section>
+      </Section>
 
-      {/* Stats */}
-      <section className="border-y border-[#1E293B] bg-[#111827] px-6 py-8">
-        <div className="mx-auto grid max-w-4xl grid-cols-2 gap-6 sm:grid-cols-4">
-          {STATS.map(({ value, label, icon: Icon }) => (
-            <div key={label} className="flex flex-col items-center gap-1 text-center">
-              <Icon size={18} className="mb-1 text-[#6366F1]" />
-              <p className="text-2xl font-bold text-[#F1F5F9]">{value}</p>
-              <p className="text-xs text-[#94A3B8]">{label}</p>
+      {/* Trust strip */}
+      <div className="border-y border-ink/10 bg-paper-dim px-6 py-6">
+        <div className="mx-auto grid max-w-4xl grid-cols-2 gap-6 text-center sm:grid-cols-4">
+          {[
+            ["3", "Debate levels"],
+            ["4", "Model UN sections"],
+            ["100%", "Personalized"],
+            ["24/7", "Available"],
+          ].map(([value, label]) => (
+            <div key={label}>
+              <p className="font-display text-2xl font-semibold text-ink">{value}</p>
+              <p className="text-xs text-stone">{label}</p>
             </div>
           ))}
         </div>
+      </div>
+
+      {/* 2 — The cost problem (signature moment) */}
+      <section className="bg-ink px-6 py-28 text-paper sm:py-36">
+        <div className="mx-auto max-w-3xl text-center">
+          <Reveal>
+            <p className="mb-5 text-xs font-semibold uppercase tracking-[0.2em] text-gold">
+              The cost of getting good
+            </p>
+          </Reveal>
+          <Reveal delay={0.05}>
+            <p className="font-display text-display-1 font-semibold leading-[0.98] tracking-tight">
+              <CountUp value={6380} prefix="$" />
+              <span className="text-paper/40"> – </span>
+              <CountUp value={10280} prefix="$" />
+            </p>
+          </Reveal>
+          <Reveal delay={0.1}>
+            <p className="mx-auto mt-6 max-w-xl text-lg leading-relaxed text-paper/70">
+              That&apos;s what private coaching costs one student, one year —
+              and even paying students rarely learn to use these skills
+              outside the tournament.
+            </p>
+          </Reveal>
+          <Reveal delay={0.15}>
+            <p className="mx-auto mt-8 max-w-xl font-display text-2xl font-medium text-paper">
+              SpeakUp AI coaches on every one of those skills, 24/7, starting
+              at <span className="text-gold">$0</span>.
+            </p>
+          </Reveal>
+        </div>
       </section>
 
-      {/* Feature Cards */}
-      <section className="px-6 py-20">
-        <div className="mx-auto max-w-6xl">
-          <div className="mb-12 text-center">
-            <h2 className="mb-3 text-3xl font-bold text-[#F1F5F9]">Three paths. One goal.</h2>
-            <p className="text-[#94A3B8]">Choose your focus or train across all three areas.</p>
+      {/* 3 — Disciplines + real-world track */}
+      <Section width="wide">
+        <Reveal>
+          <div className="mb-14 max-w-xl">
+            <p className="mb-3 text-xs font-semibold uppercase tracking-wide text-maroon">
+              Four paths
+            </p>
+            <h2 className="font-display text-display-2 font-semibold tracking-tight text-ink">
+              One coaching engine, every room that matters.
+            </h2>
           </div>
+        </Reveal>
 
-          <div className="grid gap-6 lg:grid-cols-3">
-            {FEATURES.map(({ icon: Icon, title, description, href, gradient, levels }) => (
+        <StaggerGroup className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+          {DISCIPLINES.map(({ icon: Icon, title, description, href }) => (
+            <StaggerItem key={title}>
               <Link
-                key={title}
                 href={href}
-                className="card-hover glass-card group flex flex-col rounded-2xl p-6"
+                className="group flex h-full flex-col rounded-lg border border-ink/10 bg-paper p-6 shadow-[var(--shadow-card)] transition-[transform,box-shadow] duration-200 hover:-translate-y-0.5 hover:shadow-[var(--shadow-card-hover)]"
               >
-                <div className={`mb-5 flex h-14 w-14 items-center justify-center rounded-2xl bg-linear-to-br ${gradient}`}>
-                  <Icon size={26} className="text-white" />
+                <div className="mb-5 flex h-11 w-11 items-center justify-center rounded-md bg-maroon/10 text-maroon">
+                  <Icon size={20} />
                 </div>
-                <h3 className="mb-2 text-xl font-bold text-[#F1F5F9]">{title}</h3>
-                <p className="mb-5 flex-1 text-sm leading-relaxed text-[#94A3B8]">{description}</p>
-                <div className="mb-5 flex flex-col gap-1.5">
-                  {levels.map((level) => (
-                    <div key={level} className="flex items-center gap-2">
-                      <div className="h-1 w-1 rounded-full bg-[#6366F1]" />
-                      <span className="text-xs text-[#94A3B8]">{level}</span>
-                    </div>
-                  ))}
-                </div>
-                <div className="flex items-center gap-1 text-sm font-semibold text-[#6366F1] transition-all group-hover:gap-2">
-                  Explore {title} <ChevronRight size={14} />
+                <h3 className="font-display text-lg font-semibold text-ink">
+                  {title}
+                </h3>
+                <p className="mt-2 flex-1 text-sm leading-relaxed text-ink-soft">
+                  {description}
+                </p>
+                <div className="mt-5 flex items-center gap-1 text-sm font-semibold text-maroon transition-all group-hover:gap-2">
+                  Explore <ChevronRight size={14} />
                 </div>
               </Link>
-            ))}
-          </div>
-        </div>
-      </section>
+            </StaggerItem>
+          ))}
+        </StaggerGroup>
+      </Section>
 
-      {/* How it works */}
-      <section className="bg-[#111827] px-6 py-20">
-        <div className="mx-auto max-w-4xl">
-          <div className="mb-12 text-center">
-            <h2 className="mb-3 text-3xl font-bold text-[#F1F5F9]">How it works</h2>
-            <p className="text-[#94A3B8]">From zero to confident speaker in three steps.</p>
+      {/* 4 — How a session works */}
+      <Section width="wide" surface="dim">
+        <Reveal>
+          <div className="mb-14 max-w-xl">
+            <p className="mb-3 text-xs font-semibold uppercase tracking-wide text-maroon">
+              How it works
+            </p>
+            <h2 className="font-display text-display-2 font-semibold tracking-tight text-ink">
+              From first session to skill score.
+            </h2>
           </div>
-          <div className="grid gap-8 sm:grid-cols-3">
-            {[
-              { step: "01", title: "Set up your profile", desc: "Answer a quick survey. Your coach learns your experience level, goals, and focus areas." },
-              { step: "02", title: "Learn the skills", desc: "Work through structured lessons built for your level — from basic arguments to competition strategy." },
-              { step: "03", title: "Practice and get feedback", desc: "Write speeches, run research, practice cross-ex. Your coach analyzes everything and shows you exactly how to improve." },
-            ].map(({ step, title, desc }) => (
-              <div key={step} className="flex flex-col gap-3">
-                <span className="text-gradient text-4xl font-bold">{step}</span>
-                <h3 className="text-lg font-semibold text-[#F1F5F9]">{title}</h3>
-                <p className="text-sm leading-relaxed text-[#94A3B8]">{desc}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
+        </Reveal>
 
-      {/* CTA */}
-      <section className="px-6 py-20 text-center">
-        <div className="mx-auto max-w-2xl">
-          <h2 className="mb-4 text-3xl font-bold text-[#F1F5F9]">Ready to find your voice?</h2>
-          <p className="mb-8 text-[#94A3B8]">
-            Set up your profile in 2 minutes and get a personalized learning plan built around your goals.
+        <StaggerGroup className="grid gap-10 sm:grid-cols-2 lg:grid-cols-4">
+          {STEPS.map(({ step, title, desc }) => (
+            <StaggerItem key={step}>
+              <span className="font-display text-4xl font-semibold text-maroon/30">
+                {step}
+              </span>
+              <h3 className="mt-3 text-base font-semibold text-ink">{title}</h3>
+              <p className="mt-2 text-sm leading-relaxed text-ink-soft">{desc}</p>
+            </StaggerItem>
+          ))}
+        </StaggerGroup>
+      </Section>
+
+      {/* 5 — Pricing */}
+      <Section id="pricing" width="wide" className="scroll-mt-24">
+        <Reveal>
+          <div className="mb-14 max-w-xl text-center sm:mx-auto">
+            <p className="mb-3 text-xs font-semibold uppercase tracking-wide text-maroon">
+              Pricing
+            </p>
+            <h2 className="font-display text-display-2 font-semibold tracking-tight text-ink">
+              Every tier, one coaching engine.
+            </h2>
+          </div>
+        </Reveal>
+
+        <StaggerGroup className="grid gap-5 lg:grid-cols-4">
+          {PRICING.map((tier) => (
+            <StaggerItem key={tier.name}>
+              <PricingCard {...tier} />
+            </StaggerItem>
+          ))}
+        </StaggerGroup>
+
+        <Reveal delay={0.1}>
+          <div className="mt-8 flex flex-col items-start gap-4 rounded-lg border border-gold/30 bg-gold/5 p-6 sm:flex-row sm:items-center">
+            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-md bg-gold/15 text-[#8a6b28]">
+              <GraduationCap size={20} />
+            </div>
+            <div className="flex-1">
+              <p className="font-display text-base font-semibold text-ink">
+                Running a class or club?
+              </p>
+              <p className="mt-1 text-sm text-ink-soft">
+                School License includes a full teacher dashboard — assign
+                practice, track class-wide progress, and export bulk reports.
+              </p>
+            </div>
+            <ButtonLink href="/onboarding" variant="secondary">
+              For schools
+            </ButtonLink>
+          </div>
+        </Reveal>
+      </Section>
+
+      {/* 6 — Final CTA */}
+      <Section width="narrow" className="text-center">
+        <Reveal>
+          <h2 className="font-display text-display-2 font-semibold tracking-tight text-ink">
+            Ready to find your voice?
+          </h2>
+          <p className="mx-auto mt-4 max-w-md text-ink-soft">
+            Set up your profile in two minutes and get a personalized learning
+            plan built around your goals.
           </p>
-          <Link
-            href="/onboarding"
-            className="inline-flex items-center gap-2 rounded-full bg-[#6366F1] px-8 py-4 font-semibold text-white transition-colors hover:bg-[#4F46E5]"
-          >
-            Start for Free <ChevronRight size={16} />
-          </Link>
-        </div>
-      </section>
+          <div className="mt-8 flex flex-col items-center gap-3">
+            <ButtonLink href="/onboarding" size="lg">
+              Start for Free <ChevronRight size={16} />
+            </ButtonLink>
+            <p className="flex items-center gap-1.5 text-xs text-stone">
+              <Check size={13} /> No credit card required
+            </p>
+          </div>
+        </Reveal>
+      </Section>
     </div>
   );
 }
