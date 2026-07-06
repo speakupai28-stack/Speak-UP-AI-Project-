@@ -26,7 +26,7 @@ Rules:
 - Never break character to give coaching advice during the round`;
 
   const formattedMessages = (messages as SparringMessage[]).map((m) => ({
-    role: m.role === "student" ? "user" : "assistant",
+    role: (m.role === "student" ? "user" : "assistant") as "user" | "assistant",
     content: m.content,
   }));
 

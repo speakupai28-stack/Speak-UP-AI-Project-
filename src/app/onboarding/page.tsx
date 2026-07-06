@@ -17,7 +17,7 @@ import {
   Loader2,
   Zap,
 } from "lucide-react";
-import type { OnboardingProfile } from "@/app/api/onboarding/route";
+import type { OnboardingProfile } from "@/lib/types";
 
 type Step = 1 | 2 | 3 | 4 | 5;
 
