@@ -15,7 +15,9 @@
   --maroon: #8a1f2b;
   --maroon-dark: #6e1720;
   --gold: #b8923f;
+  --gold-dark: #96762f;
   --forest: #3f5d45;
+  --forest-dark: #32493a;
 
   --radius-sm: 0.25rem;
   --radius-md: 0.5rem;
@@ -35,7 +37,9 @@
   --color-maroon: var(--maroon);
   --color-maroon-dark: var(--maroon-dark);
   --color-gold: var(--gold);
+  --color-gold-dark: var(--gold-dark);
   --color-forest: var(--forest);
+  --color-forest-dark: var(--forest-dark);
 
   --radius-sm: var(--radius-sm);
   --radius-md: var(--radius-md);
@@ -63,6 +67,23 @@ body {
 
 .font-display {
   font-family: var(--font-fraunces), ui-serif, Georgia, serif;
+}
+
+/* Compatibility shims: legacy class names from the old dark template,
+   redefined against the Varsity editorial tokens so not-yet-migrated
+   markup renders correctly instead of unstyled. */
+.glass-card {
+  background: var(--paper);
+  border: 1px solid rgba(28, 26, 22, 0.1);
+  box-shadow: var(--shadow-card);
+}
+
+.card-hover {
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.card-hover:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-card-hover);
 }
 
 @keyframes fade-up {

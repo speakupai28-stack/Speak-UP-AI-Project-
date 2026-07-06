@@ -21,24 +21,24 @@ export default function SpeakingLevel3() {
       {LESSONS.map((lesson, i) => {
         const open = openLesson === i;
         return (
-          <div key={lesson.id} className="glass-card overflow-hidden rounded-2xl">
+          <div key={lesson.id} className="glass-card overflow-hidden rounded-lg">
             <button onClick={() => setOpenLesson(open ? -1 : i)} className="flex w-full items-center gap-4 p-5 text-left">
-              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-amber-500"><Trophy size={16} className="text-white" /></div>
-              <div className="flex-1"><span className="text-xs font-semibold text-[#94A3B8]">Lesson {lesson.id}</span><p className="font-semibold text-[#F1F5F9]">{lesson.title}</p></div>
-              {open ? <ChevronUp size={16} className="shrink-0 text-[#94A3B8]" /> : <ChevronDown size={16} className="shrink-0 text-[#94A3B8]" />}
+              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-gold/10"><Trophy size={16} className="text-[#8a6b28]" /></div>
+              <div className="flex-1"><span className="text-xs font-semibold text-ink-soft">Lesson {lesson.id}</span><p className="font-semibold text-ink">{lesson.title}</p></div>
+              {open ? <ChevronUp size={16} className="shrink-0 text-ink-soft" /> : <ChevronDown size={16} className="shrink-0 text-ink-soft" />}
             </button>
             {open && (
-              <div className="border-t border-[#1E293B] px-5 pb-5 pt-4 space-y-4">
-                <p className="text-sm leading-relaxed text-[#94A3B8]">{lesson.concept}</p>
-                {"contexts" in lesson && <div className="grid gap-2 sm:grid-cols-2">{(lesson as {contexts:{type:string;style:string}[]}).contexts.map((c) => <div key={c.type} className="rounded-xl border border-[#1E293B] bg-[#0A0F1E] p-3"><p className="mb-0.5 text-sm font-semibold text-amber-400">{c.type}</p><p className="text-xs text-[#94A3B8]">{c.style}</p></div>)}</div>}
-                {"formats" in lesson && <div className="flex flex-col gap-2">{(lesson as {formats:{name:string;rules:string}[]}).formats.map((f) => <div key={f.name} className="rounded-xl border border-[#1E293B] bg-[#0A0F1E] p-3"><p className="mb-1 text-sm font-semibold text-amber-400">{f.name}</p><p className="text-xs text-[#94A3B8]">{f.rules}</p></div>)}</div>}
-                {"techniques" in lesson && <div className="flex flex-col gap-2">{(lesson as {techniques:{name:string;desc:string}[]}).techniques.map((t) => <div key={t.name} className="rounded-xl border border-[#1E293B] bg-[#0A0F1E] p-3"><p className="mb-0.5 text-sm font-semibold text-amber-400">{t.name}</p><p className="text-xs text-[#94A3B8]">{t.desc}</p></div>)}</div>}
-                {"strategies" in lesson && (lesson as {strategies:string[]}).strategies.map((s, idx) => <div key={idx} className="flex gap-2"><ArrowRight size={14} className="mt-0.5 shrink-0 text-amber-400" /><p className="text-sm text-[#94A3B8]">{s}</p></div>)}
-                {"tools" in lesson && (lesson as {tools:string[]}).tools.map((t, idx) => <div key={idx} className="flex gap-2"><ArrowRight size={14} className="mt-0.5 shrink-0 text-amber-400" /><p className="text-sm text-[#94A3B8]">{t}</p></div>)}
-                {"practices" in lesson && (lesson as {practices:string[]}).practices.map((p, idx) => <div key={idx} className="flex gap-2"><ArrowRight size={14} className="mt-0.5 shrink-0 text-amber-400" /><p className="text-sm text-[#94A3B8]">{p}</p></div>)}
-                {"openers" in lesson && <div className="flex flex-col gap-2">{(lesson as {openers:{type:string;example:string}[]}).openers.map((o) => <div key={o.type} className="rounded-xl border border-[#1E293B] bg-[#0A0F1E] p-3"><p className="mb-1 text-xs font-semibold text-amber-400">{o.type}</p><p className="text-sm italic text-[#94A3B8]">{o.example}</p></div>)}</div>}
-                {"tips" in lesson && (lesson as {tips:string[]}).tips.map((t, idx) => <div key={idx} className="flex gap-2"><ArrowRight size={14} className="mt-0.5 shrink-0 text-amber-400" /><p className="text-sm text-[#94A3B8]">{t}</p></div>)}
-                <div className="rounded-xl border border-amber-500/30 bg-amber-500/10 px-4 py-3"><div className="flex gap-2"><Lightbulb size={14} className="mt-0.5 shrink-0 text-amber-400" /><p className="text-sm font-medium text-[#F1F5F9]">{lesson.takeaway}</p></div></div>
+              <div className="border-t border-ink/10 px-5 pb-5 pt-4 space-y-4">
+                <p className="text-sm leading-relaxed text-ink-soft">{lesson.concept}</p>
+                {"contexts" in lesson && <div className="grid gap-2 sm:grid-cols-2">{(lesson as {contexts:{type:string;style:string}[]}).contexts.map((c) => <div key={c.type} className="rounded-md border border-ink/10 bg-paper-dim p-3"><p className="mb-0.5 text-sm font-semibold text-[#8a6b28]">{c.type}</p><p className="text-xs text-ink-soft">{c.style}</p></div>)}</div>}
+                {"formats" in lesson && <div className="flex flex-col gap-2">{(lesson as {formats:{name:string;rules:string}[]}).formats.map((f) => <div key={f.name} className="rounded-md border border-ink/10 bg-paper-dim p-3"><p className="mb-1 text-sm font-semibold text-[#8a6b28]">{f.name}</p><p className="text-xs text-ink-soft">{f.rules}</p></div>)}</div>}
+                {"techniques" in lesson && <div className="flex flex-col gap-2">{(lesson as {techniques:{name:string;desc:string}[]}).techniques.map((t) => <div key={t.name} className="rounded-md border border-ink/10 bg-paper-dim p-3"><p className="mb-0.5 text-sm font-semibold text-[#8a6b28]">{t.name}</p><p className="text-xs text-ink-soft">{t.desc}</p></div>)}</div>}
+                {"strategies" in lesson && (lesson as {strategies:string[]}).strategies.map((s, idx) => <div key={idx} className="flex gap-2"><ArrowRight size={14} className="mt-0.5 shrink-0 text-[#8a6b28]" /><p className="text-sm text-ink-soft">{s}</p></div>)}
+                {"tools" in lesson && (lesson as {tools:string[]}).tools.map((t, idx) => <div key={idx} className="flex gap-2"><ArrowRight size={14} className="mt-0.5 shrink-0 text-[#8a6b28]" /><p className="text-sm text-ink-soft">{t}</p></div>)}
+                {"practices" in lesson && (lesson as {practices:string[]}).practices.map((p, idx) => <div key={idx} className="flex gap-2"><ArrowRight size={14} className="mt-0.5 shrink-0 text-[#8a6b28]" /><p className="text-sm text-ink-soft">{p}</p></div>)}
+                {"openers" in lesson && <div className="flex flex-col gap-2">{(lesson as {openers:{type:string;example:string}[]}).openers.map((o) => <div key={o.type} className="rounded-md border border-ink/10 bg-paper-dim p-3"><p className="mb-1 text-xs font-semibold text-[#8a6b28]">{o.type}</p><p className="text-sm italic text-ink-soft">{o.example}</p></div>)}</div>}
+                {"tips" in lesson && (lesson as {tips:string[]}).tips.map((t, idx) => <div key={idx} className="flex gap-2"><ArrowRight size={14} className="mt-0.5 shrink-0 text-[#8a6b28]" /><p className="text-sm text-ink-soft">{t}</p></div>)}
+                <div className="rounded-md border border-gold/30 bg-gold/10 px-4 py-3"><div className="flex gap-2"><Lightbulb size={14} className="mt-0.5 shrink-0 text-[#8a6b28]" /><p className="text-sm font-medium text-ink">{lesson.takeaway}</p></div></div>
               </div>
             )}
           </div>

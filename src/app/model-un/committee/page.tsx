@@ -3,6 +3,16 @@
 import { useState } from "react";
 import { clsx } from "clsx";
 import { Users, ChevronDown, ChevronUp, ArrowRight, Lightbulb, Loader2, Send, Zap } from "lucide-react";
+import { FeedbackSkeleton } from "@/components/ui/FeedbackSkeleton";
+import { ScoreReveal } from "@/components/motion/ScoreReveal";
+import type { CommitteeSpeechFeedback } from "@/lib/types";
+
+const ANALYZING_MESSAGES = [
+  "Reading your speech…",
+  "Checking your country's real position…",
+  "Reviewing structure and diplomatic language…",
+  "Writing your coach feedback…",
+];
 
 const LESSONS = [
   {
@@ -76,7 +86,7 @@ export default function ModelUNCommittee() {
   const [topic, setTopic] = useState("");
   const [speechText, setSpeechText] = useState("");
   const [loading, setLoading] = useState(false);
-  const [feedback, setFeedback] = useState<string | null>(null);
+  const [feedback, setFeedback] = useState<CommitteeSpeechFeedback | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   async function handleSubmit(e: React.FormEvent) {
@@ -90,8 +100,8 @@ export default function ModelUNCommittee() {
         body: JSON.stringify({ speechContext, country, topic, speechText }),
       });
       if (!res.ok) throw new Error();
-      const data = await res.json();
-      setFeedback(JSON.stringify(data));
+      const data: CommitteeSpeechFeedback = await res.json();
+      setFeedback(data);
     } catch { setError("Something went wrong. Try again."); }
     finally { setLoading(false); }
   }
@@ -100,18 +110,18 @@ export default function ModelUNCommittee() {
     <div className="mx-auto max-w-4xl px-6 py-10">
       <div className="mb-8">
         <div className="mb-3 flex items-center gap-2">
-          <span className="rounded-full border border-blue-500/30 bg-blue-500/10 px-3 py-0.5 text-xs font-semibold text-blue-400">Section 2</span>
-          <span className="rounded-full border border-[#1E293B] px-3 py-0.5 text-xs text-[#94A3B8]">Committee Work</span>
+          <span className="rounded-full border border-maroon/30 bg-maroon/10 px-3 py-0.5 text-xs font-semibold text-maroon">Section 2</span>
+          <span className="rounded-full border border-ink/10 px-3 py-0.5 text-xs text-ink-soft">Committee Work</span>
         </div>
-        <h1 className="mb-2 text-3xl font-bold text-[#F1F5F9]">Committee Work & Speeches</h1>
-        <p className="text-[#94A3B8]">Deliver powerful speeches, lobby effectively, and draft winning resolutions.</p>
+        <h1 className="mb-2 text-3xl font-bold text-ink">Committee Work & Speeches</h1>
+        <p className="text-ink-soft">Deliver powerful speeches, lobby effectively, and draft winning resolutions.</p>
       </div>
 
-      <div className="mb-8 flex gap-1 rounded-xl border border-[#1E293B] bg-[#111827] p-1">
+      <div className="mb-8 flex gap-1 rounded-md border border-ink/10 bg-paper-dim p-1">
         {(["learn", "practice"] as const).map((t) => (
           <button key={t} onClick={() => setTab(t)}
             className={clsx("flex flex-1 items-center justify-center gap-2 rounded-lg py-2.5 text-sm font-semibold capitalize transition-colors",
-              tab === t ? "bg-[#6366F1] text-white" : "text-[#94A3B8] hover:text-[#F1F5F9]")}>
+              tab === t ? "bg-maroon text-paper" : "text-ink-soft hover:text-ink")}>
             {t === "learn" ? <Users size={14} /> : <Send size={14} />}
             {t === "learn" ? "5 Lessons" : "Practice Speech"}
           </button>
@@ -123,39 +133,39 @@ export default function ModelUNCommittee() {
           {LESSONS.map((lesson, i) => {
             const open = openLesson === i;
             return (
-              <div key={lesson.id} className="glass-card overflow-hidden rounded-2xl">
+              <div key={lesson.id} className="glass-card overflow-hidden rounded-lg">
                 <button onClick={() => setOpenLesson(open ? -1 : i)} className="flex w-full items-center gap-4 p-5 text-left">
-                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-blue-500">
-                    <Users size={16} className="text-white" />
+                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-maroon/10">
+                    <Users size={16} className="text-maroon" />
                   </div>
                   <div className="flex-1">
-                    <span className="text-xs font-semibold text-[#94A3B8]">Lesson {lesson.id}</span>
-                    <p className="font-semibold text-[#F1F5F9]">{lesson.title}</p>
+                    <span className="text-xs font-semibold text-ink-soft">Lesson {lesson.id}</span>
+                    <p className="font-semibold text-ink">{lesson.title}</p>
                   </div>
-                  {open ? <ChevronUp size={16} className="shrink-0 text-[#94A3B8]" /> : <ChevronDown size={16} className="shrink-0 text-[#94A3B8]" />}
+                  {open ? <ChevronUp size={16} className="shrink-0 text-ink-soft" /> : <ChevronDown size={16} className="shrink-0 text-ink-soft" />}
                 </button>
                 {open && (
-                  <div className="border-t border-[#1E293B] px-5 pb-5 pt-4 space-y-4">
-                    <p className="text-sm leading-relaxed text-[#94A3B8]">{lesson.concept}</p>
+                  <div className="border-t border-ink/10 px-5 pb-5 pt-4 space-y-4">
+                    <p className="text-sm leading-relaxed text-ink-soft">{lesson.concept}</p>
                     {"structure" in lesson && (
                       <div className="flex flex-col gap-2">
                         {(lesson as {structure:{part:string;desc:string}[]}).structure.map((s) => (
-                          <div key={s.part} className="rounded-xl border border-[#1E293B] bg-[#0A0F1E] p-3">
-                            <p className="mb-0.5 text-sm font-semibold text-blue-400">{s.part}</p>
-                            <p className="text-xs text-[#94A3B8]">{s.desc}</p>
+                          <div key={s.part} className="rounded-md border border-ink/10 bg-paper-dim p-3">
+                            <p className="mb-0.5 text-sm font-semibold text-maroon">{s.part}</p>
+                            <p className="text-xs text-ink-soft">{s.desc}</p>
                           </div>
                         ))}
                       </div>
                     )}
                     {"tips" in lesson && (lesson as {tips:string[]}).tips.map((tip, idx) => (
-                      <div key={idx} className="flex gap-2"><ArrowRight size={14} className="mt-0.5 shrink-0 text-blue-400" /><p className="text-sm text-[#94A3B8]">{tip}</p></div>
+                      <div key={idx} className="flex gap-2"><ArrowRight size={14} className="mt-0.5 shrink-0 text-maroon" /><p className="text-sm text-ink-soft">{tip}</p></div>
                     ))}
                     {"elements" in lesson && (
                       <div className="grid gap-2 sm:grid-cols-2">
                         {(lesson as {elements:{name:string;desc:string}[]}).elements.map((el) => (
-                          <div key={el.name} className="rounded-xl border border-[#1E293B] bg-[#0A0F1E] p-3">
-                            <p className="mb-0.5 text-sm font-semibold text-[#F1F5F9]">{el.name}</p>
-                            <p className="text-xs text-[#94A3B8]">{el.desc}</p>
+                          <div key={el.name} className="rounded-md border border-ink/10 bg-paper-dim p-3">
+                            <p className="mb-0.5 text-sm font-semibold text-ink">{el.name}</p>
+                            <p className="text-xs text-ink-soft">{el.desc}</p>
                           </div>
                         ))}
                       </div>
@@ -163,25 +173,25 @@ export default function ModelUNCommittee() {
                     {"types" in lesson && (
                       <div className="flex flex-col gap-2">
                         {(lesson as {types:{name:string;desc:string}[]}).types.map((t) => (
-                          <div key={t.name} className="rounded-xl border border-[#1E293B] bg-[#0A0F1E] p-3">
-                            <p className="mb-0.5 text-sm font-semibold text-[#F1F5F9]">{t.name}</p>
-                            <p className="text-xs text-[#94A3B8]">{t.desc}</p>
+                          <div key={t.name} className="rounded-md border border-ink/10 bg-paper-dim p-3">
+                            <p className="mb-0.5 text-sm font-semibold text-ink">{t.name}</p>
+                            <p className="text-xs text-ink-soft">{t.desc}</p>
                           </div>
                         ))}
                       </div>
                     )}
                     {"process" in lesson && (lesson as {process:string[]}).process.map((p, idx) => (
-                      <div key={idx} className="flex gap-2"><ArrowRight size={14} className="mt-0.5 shrink-0 text-blue-400" /><p className="text-sm text-[#94A3B8]">{p}</p></div>
+                      <div key={idx} className="flex gap-2"><ArrowRight size={14} className="mt-0.5 shrink-0 text-maroon" /><p className="text-sm text-ink-soft">{p}</p></div>
                     ))}
-                    <div className="rounded-xl border border-blue-500/30 bg-blue-500/10 px-4 py-3">
-                      <div className="flex gap-2"><Lightbulb size={14} className="mt-0.5 shrink-0 text-blue-400" /><p className="text-sm font-medium text-[#F1F5F9]">{lesson.takeaway}</p></div>
+                    <div className="rounded-md border border-maroon/30 bg-maroon/10 px-4 py-3">
+                      <div className="flex gap-2"><Lightbulb size={14} className="mt-0.5 shrink-0 text-maroon" /><p className="text-sm font-medium text-ink">{lesson.takeaway}</p></div>
                     </div>
                   </div>
                 )}
               </div>
             );
           })}
-          <button onClick={() => setTab("practice")} className="mt-2 flex w-full items-center justify-center gap-2 rounded-xl bg-[#6366F1] py-3.5 font-semibold text-white hover:bg-[#4F46E5]">
+          <button onClick={() => setTab("practice")} className="mt-2 flex w-full items-center justify-center gap-2 rounded-md bg-maroon py-3.5 font-semibold text-paper hover:bg-maroon-dark">
             Practice a Speech <ArrowRight size={16} />
           </button>
         </div>
@@ -193,41 +203,111 @@ export default function ModelUNCommittee() {
             {SPEECH_CONTEXTS.map((c) => (
               <button key={c} type="button" onClick={() => setSpeechContext(c)}
                 className={clsx("rounded-full border px-3 py-1.5 text-xs font-medium transition-all",
-                  speechContext === c ? "border-blue-500/50 bg-blue-500/10 text-blue-400" : "border-[#1E293B] bg-[#111827] text-[#94A3B8]")}>
+                  speechContext === c ? "border-maroon/50 bg-maroon/10 text-maroon" : "border-ink/10 bg-paper-dim text-ink-soft")}>
                 {c}
               </button>
             ))}
           </div>
           <div className="grid gap-4 sm:grid-cols-2">
             <div>
-              <label className="mb-2 block text-sm font-medium text-[#94A3B8]">Your Country</label>
+              <label className="mb-2 block text-sm font-medium text-ink-soft">Your Country</label>
               <input type="text" placeholder="e.g. France, Brazil..." value={country} onChange={(e) => setCountry(e.target.value)}
-                className="w-full rounded-xl border border-[#1E293B] bg-[#111827] px-4 py-3 text-sm text-[#F1F5F9] placeholder-[#94A3B8]/60 outline-none focus:border-[#6366F1] focus:ring-1 focus:ring-[#6366F1]" />
+                className="w-full rounded-md border border-ink/10 bg-paper-dim px-4 py-3 text-sm text-ink placeholder-stone/60 outline-none focus:border-maroon focus:ring-1 focus:ring-maroon" />
             </div>
             <div>
-              <label className="mb-2 block text-sm font-medium text-[#94A3B8]">Topic</label>
+              <label className="mb-2 block text-sm font-medium text-ink-soft">Topic</label>
               <input type="text" placeholder="e.g. Climate change, Sudan crisis..." value={topic} onChange={(e) => setTopic(e.target.value)}
-                className="w-full rounded-xl border border-[#1E293B] bg-[#111827] px-4 py-3 text-sm text-[#F1F5F9] placeholder-[#94A3B8]/60 outline-none focus:border-[#6366F1] focus:ring-1 focus:ring-[#6366F1]" />
+                className="w-full rounded-md border border-ink/10 bg-paper-dim px-4 py-3 text-sm text-ink placeholder-stone/60 outline-none focus:border-maroon focus:ring-1 focus:ring-maroon" />
             </div>
           </div>
           <div>
-            <label className="mb-2 block text-sm font-medium text-[#94A3B8]">Your Speech</label>
+            <label className="mb-2 block text-sm font-medium text-ink-soft">Your Speech</label>
             <textarea rows={8} placeholder="Write your MUN speech here..." value={speechText} onChange={(e) => setSpeechText(e.target.value)}
-              className="w-full resize-y rounded-xl border border-[#1E293B] bg-[#111827] px-4 py-3 text-sm text-[#F1F5F9] placeholder-[#94A3B8]/50 outline-none focus:border-[#6366F1] focus:ring-1 focus:ring-[#6366F1]" />
+              className="w-full resize-y rounded-md border border-ink/10 bg-paper-dim px-4 py-3 text-sm text-ink placeholder-stone/50 outline-none focus:border-maroon focus:ring-1 focus:ring-maroon" />
           </div>
-          {error && <p className="text-sm text-rose-400">{error}</p>}
+          {error && <p className="text-sm text-maroon">{error}</p>}
           <button type="submit" disabled={!speechText.trim() || !country.trim() || !topic.trim() || loading}
-            className={clsx("flex items-center justify-center gap-2 rounded-xl py-3.5 font-semibold transition-colors",
-              speechText.trim() && country.trim() && topic.trim() && !loading ? "bg-[#6366F1] text-white hover:bg-[#4F46E5]" : "cursor-not-allowed bg-[#1E293B] text-[#94A3B8]")}>
+            className={clsx("flex items-center justify-center gap-2 rounded-md py-3.5 font-semibold transition-colors",
+              speechText.trim() && country.trim() && topic.trim() && !loading ? "bg-maroon text-paper hover:bg-maroon-dark" : "cursor-not-allowed bg-ink/10 text-ink-soft")}>
             {loading ? <><Loader2 size={16} className="animate-spin" /> Analyzing…</> : <><Send size={16} /> Get Speech Feedback</>}
           </button>
-          {feedback && (
-            <div className="rounded-2xl border border-blue-500/30 bg-blue-500/10 p-5">
-              <div className="flex items-center gap-2 mb-3"><Zap size={14} className="text-blue-400" /><span className="text-xs font-semibold uppercase text-blue-400">Coach Feedback</span></div>
-              <pre className="text-sm text-[#94A3B8] whitespace-pre-wrap">{feedback}</pre>
-            </div>
-          )}
+
+          {loading && <FeedbackSkeleton messages={ANALYZING_MESSAGES} rows={5} />}
         </form>
+      )}
+
+      {tab === "practice" && feedback && !loading && (
+        <ScoreReveal revealKey={feedback.overallScore} className="mt-5 flex flex-col gap-4">
+          <div className="rounded-lg border border-maroon/30 bg-maroon/10 p-5">
+            <div className="mb-2 flex items-center justify-between">
+              <span className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-maroon">
+                <Zap size={14} /> Coach Feedback
+              </span>
+              <span className="text-2xl font-bold text-ink">{feedback.overallScore}/10</span>
+            </div>
+            <p className="text-sm text-ink">{feedback.summary}</p>
+          </div>
+
+          <div className="glass-card rounded-lg p-5">
+            <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-ink-soft">Country Representation</p>
+            <p className="text-sm leading-relaxed text-ink-soft">{feedback.countryRepresentation}</p>
+          </div>
+
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div className="glass-card rounded-lg p-5">
+              <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-ink-soft">Speech Structure</p>
+              <p className="text-sm leading-relaxed text-ink-soft">{feedback.speechStructure}</p>
+            </div>
+            <div className="glass-card rounded-lg p-5">
+              <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-ink-soft">Diplomatic Language</p>
+              <p className="text-sm leading-relaxed text-ink-soft">{feedback.diplomaticLanguage}</p>
+            </div>
+          </div>
+
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div className="glass-card rounded-lg p-5">
+              <p className="mb-3 text-xs font-semibold uppercase tracking-wide text-forest">Strengths</p>
+              <div className="flex flex-col gap-1.5">
+                {feedback.strengths.map((s, i) => (
+                  <div key={i} className="flex gap-2"><ArrowRight size={13} className="mt-0.5 shrink-0 text-forest" /><p className="text-sm text-ink-soft">{s}</p></div>
+                ))}
+              </div>
+            </div>
+            <div className="glass-card rounded-lg p-5">
+              <p className="mb-3 text-xs font-semibold uppercase tracking-wide text-[#8a6b28]">Improvements</p>
+              <div className="flex flex-col gap-1.5">
+                {feedback.improvements.map((imp, i) => (
+                  <div key={i} className="flex gap-2"><ArrowRight size={13} className="mt-0.5 shrink-0 text-[#8a6b28]" /><p className="text-sm text-ink-soft">{imp}</p></div>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          <div className="glass-card rounded-lg p-5">
+            <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-maroon">Stronger Opening Sentence</p>
+            <p className="text-sm italic leading-relaxed text-ink-soft">&ldquo;{feedback.improvedOpeningSentence}&rdquo;</p>
+          </div>
+
+          <div className="glass-card rounded-lg p-5">
+            <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-maroon">Suggested Operative Clause</p>
+            <p className="text-sm italic leading-relaxed text-ink-soft">&ldquo;{feedback.suggestedOperativeClause}&rdquo;</p>
+          </div>
+
+          <div className="flex items-start gap-3 rounded-md border border-ink/10 bg-paper-dim p-4">
+            <Zap size={14} className="mt-0.5 shrink-0 text-[#8a6b28]" />
+            <div>
+              <p className="text-xs font-semibold text-[#8a6b28]">Next Step</p>
+              <p className="text-sm text-ink">{feedback.nextStep}</p>
+            </div>
+          </div>
+
+          <button
+            onClick={() => { setFeedback(null); setSpeechText(""); }}
+            className="rounded-md border border-ink/10 py-3 text-sm font-medium text-ink-soft transition-colors hover:border-maroon/50 hover:text-ink"
+          >
+            Try Another Speech
+          </button>
+        </ScoreReveal>
       )}
     </div>
   );

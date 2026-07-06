@@ -21,7 +21,16 @@ import {
   Clock,
   Mic,
 } from "lucide-react";
+import { FeedbackSkeleton } from "@/components/ui/FeedbackSkeleton";
+import { ScoreReveal } from "@/components/motion/ScoreReveal";
 import type { DebateLevel1Feedback } from "@/lib/types";
+
+const ANALYZING_MESSAGES = [
+  "Reading your speech…",
+  "Checking your Claim, Warrant, Impact…",
+  "Weighing your strengths and gaps…",
+  "Writing your coach feedback…",
+];
 
 // ── Lesson Data (follows blueprint exactly) ─────────────────────────────────
 
@@ -30,7 +39,7 @@ const LESSONS = [
     id: 1,
     icon: MessageSquare,
     title: "What Is Debate?",
-    color: "bg-indigo-500",
+    color: "bg-maroon/10",
     concept: "Debate is a structured argument between two sides on a specific topic called a resolution. One side argues FOR it (Affirmative) and one side argues AGAINST it (Negative).",
     types: [
       { name: "Policy (CX)", desc: "2v2 teams debate policy resolutions, very fast-paced" },
@@ -44,12 +53,12 @@ const LESSONS = [
     id: 2,
     icon: Target,
     title: "Claim, Warrant, Impact (CWI)",
-    color: "bg-purple-500",
+    color: "bg-maroon/10",
     concept: "Every strong argument has three parts. Miss one and your argument falls apart.",
     cwi: [
-      { label: "Claim", color: "text-indigo-400", desc: "The point you're making — your position.", example: '"Social media harms mental health."' },
-      { label: "Warrant", color: "text-purple-400", desc: "The reason or evidence that proves your claim.", example: '"Studies show teens who use social media 3+ hours daily report 40% higher rates of anxiety."' },
-      { label: "Impact", color: "text-amber-400", desc: "Why it matters — the real-world consequence.", example: '"This means millions of teenagers are suffering preventable mental health crises."' },
+      { label: "Claim", color: "text-maroon", desc: "The point you're making — your position.", example: '"Social media harms mental health."' },
+      { label: "Warrant", color: "text-maroon", desc: "The reason or evidence that proves your claim.", example: '"Studies show teens who use social media 3+ hours daily report 40% higher rates of anxiety."' },
+      { label: "Impact", color: "text-[#8a6b28]", desc: "Why it matters — the real-world consequence.", example: '"This means millions of teenagers are suffering preventable mental health crises."' },
     ],
     takeaway: "Claim + Warrant + Impact = a complete argument. Always write all three.",
   },
@@ -57,11 +66,11 @@ const LESSONS = [
     id: 3,
     icon: Swords,
     title: "Sides: AFF/NEG and Pro/Con",
-    color: "bg-blue-500",
+    color: "bg-maroon/10",
     concept: "Every debate round has two sides. The names differ by format — but the logic is the same: one side supports the resolution, one opposes it.",
     sides: [
-      { name: "Affirmative / Pro", color: "text-emerald-400", desc: "Supports the resolution. Goes first. Has the burden of proof — must show the resolution is true. Called 'Affirmative' (AFF) in LD and Policy; called 'Pro' in Public Forum." },
-      { name: "Negative / Con", color: "text-rose-400", desc: "Opposes the resolution. Responds to the AFF/Pro. Must prove the other side is wrong or hasn't met their burden. Called 'Negative' (NEG) in LD and Policy; called 'Con' in Public Forum." },
+      { name: "Affirmative / Pro", color: "text-forest", desc: "Supports the resolution. Goes first. Has the burden of proof — must show the resolution is true. Called 'Affirmative' (AFF) in LD and Policy; called 'Pro' in Public Forum." },
+      { name: "Negative / Con", color: "text-maroon", desc: "Opposes the resolution. Responds to the AFF/Pro. Must prove the other side is wrong or hasn't met their burden. Called 'Negative' (NEG) in LD and Policy; called 'Con' in Public Forum." },
     ],
     takeaway: "LD & Policy use Affirmative/Negative. Public Forum uses Pro/Con. Parliamentary uses Government/Opposition.",
   },
@@ -69,7 +78,7 @@ const LESSONS = [
     id: 4,
     icon: List,
     title: "How to Flow",
-    color: "bg-cyan-500",
+    color: "bg-maroon/10",
     concept: 'Flowing is taking notes during a debate round. Debaters use a special shorthand to track every argument so nothing gets "dropped" (unanswered).',
     tips: [
       "Use abbreviations: 'b/c' = because, 'w/' = with, '+' = and, '→' = leads to",
@@ -83,7 +92,7 @@ const LESSONS = [
     id: 5,
     icon: MessageSquare,
     title: "Cross-Examination Basics",
-    color: "bg-teal-500",
+    color: "bg-maroon/10",
     concept: "Cross-ex (CX) is a period where one team questions the other. It's not a fight — it's a tool to clarify, expose weaknesses, and set up your own arguments.",
     dos: ["Ask short, specific questions", "Listen carefully to their answers", "Use their answers in your next speech", "Stay calm and confident"],
     donts: ["Make speeches instead of asking questions", "Ask questions you don't know the answer to", "Get into arguments — ask and move on", "Use cross-ex to be aggressive"],
@@ -93,7 +102,7 @@ const LESSONS = [
     id: 6,
     icon: RotateCcw,
     title: "Writing a Rebuttal",
-    color: "bg-violet-500",
+    color: "bg-maroon/10",
     concept: "A rebuttal is your response to the other team's arguments. You're not just saying they're wrong — you're explaining WHY they're wrong with evidence.",
     steps: [
       { step: "1. Point", desc: 'Name the argument you\'re responding to. "They said social media doesn\'t harm teens..."' },
@@ -107,7 +116,7 @@ const LESSONS = [
     id: 7,
     icon: Clock,
     title: "Round Structure & Speaking Order",
-    color: "bg-amber-500",
+    color: "bg-maroon/10",
     concept: "Every format has its own speech order. These are the three main NSDA formats — know which one your tournament uses.",
     formats: [
       {
@@ -181,34 +190,34 @@ function LessonCard({ lesson, index }: { lesson: typeof LESSONS[0]; index: numbe
   const Icon = lesson.icon;
 
   return (
-    <div className="glass-card overflow-hidden rounded-2xl">
+    <div className="glass-card overflow-hidden rounded-lg">
       <button
         onClick={() => setOpen((o) => !o)}
         className="flex w-full items-center gap-4 p-5 text-left"
       >
         <div className={clsx("flex h-9 w-9 shrink-0 items-center justify-center rounded-lg", lesson.color)}>
-          <Icon size={16} className="text-white" />
+          <Icon size={16} className="text-maroon" />
         </div>
         <div className="flex-1">
           <div className="flex items-center gap-2">
-            <span className="text-xs font-semibold text-[#94A3B8]">Lesson {lesson.id}</span>
+            <span className="text-xs font-semibold text-ink-soft">Lesson {lesson.id}</span>
           </div>
-          <p className="font-semibold text-[#F1F5F9]">{lesson.title}</p>
+          <p className="font-semibold text-ink">{lesson.title}</p>
         </div>
-        {open ? <ChevronUp size={16} className="shrink-0 text-[#94A3B8]" /> : <ChevronDown size={16} className="shrink-0 text-[#94A3B8]" />}
+        {open ? <ChevronUp size={16} className="shrink-0 text-ink-soft" /> : <ChevronDown size={16} className="shrink-0 text-ink-soft" />}
       </button>
 
       {open && (
-        <div className="border-t border-[#1E293B] px-5 pb-5 pt-4 space-y-4">
-          <p className="text-sm leading-relaxed text-[#94A3B8]">{lesson.concept}</p>
+        <div className="border-t border-ink/10 px-5 pb-5 pt-4 space-y-4">
+          <p className="text-sm leading-relaxed text-ink-soft">{lesson.concept}</p>
 
           {/* Types (Lesson 1) */}
           {"types" in lesson && (
             <div className="grid gap-2 sm:grid-cols-2">
               {(lesson as typeof LESSONS[0] & { types: { name: string; desc: string }[] }).types.map((t) => (
-                <div key={t.name} className="rounded-xl border border-[#1E293B] bg-[#0A0F1E] p-3">
-                  <p className="mb-0.5 text-sm font-semibold text-[#F1F5F9]">{t.name}</p>
-                  <p className="text-xs text-[#94A3B8]">{t.desc}</p>
+                <div key={t.name} className="rounded-md border border-ink/10 bg-paper-dim p-3">
+                  <p className="mb-0.5 text-sm font-semibold text-ink">{t.name}</p>
+                  <p className="text-xs text-ink-soft">{t.desc}</p>
                 </div>
               ))}
             </div>
@@ -218,10 +227,10 @@ function LessonCard({ lesson, index }: { lesson: typeof LESSONS[0]; index: numbe
           {"cwi" in lesson && (
             <div className="flex flex-col gap-3">
               {(lesson as typeof LESSONS[1] & { cwi: { label: string; color: string; desc: string; example: string }[] }).cwi.map((c) => (
-                <div key={c.label} className="rounded-xl border border-[#1E293B] bg-[#0A0F1E] p-4">
+                <div key={c.label} className="rounded-md border border-ink/10 bg-paper-dim p-4">
                   <p className={clsx("mb-1 text-sm font-bold", c.color)}>{c.label}</p>
-                  <p className="mb-2 text-sm text-[#94A3B8]">{c.desc}</p>
-                  <p className="text-xs italic text-[#6366F1]">{c.example}</p>
+                  <p className="mb-2 text-sm text-ink-soft">{c.desc}</p>
+                  <p className="text-xs italic text-maroon">{c.example}</p>
                 </div>
               ))}
             </div>
@@ -231,9 +240,9 @@ function LessonCard({ lesson, index }: { lesson: typeof LESSONS[0]; index: numbe
           {"sides" in lesson && (
             <div className="grid gap-3 sm:grid-cols-2">
               {(lesson as typeof LESSONS[2] & { sides: { name: string; color: string; desc: string }[] }).sides.map((s) => (
-                <div key={s.name} className="rounded-xl border border-[#1E293B] bg-[#0A0F1E] p-4">
+                <div key={s.name} className="rounded-md border border-ink/10 bg-paper-dim p-4">
                   <p className={clsx("mb-1 font-bold", s.color)}>{s.name}</p>
-                  <p className="text-sm text-[#94A3B8]">{s.desc}</p>
+                  <p className="text-sm text-ink-soft">{s.desc}</p>
                 </div>
               ))}
             </div>
@@ -244,8 +253,8 @@ function LessonCard({ lesson, index }: { lesson: typeof LESSONS[0]; index: numbe
             <div className="flex flex-col gap-2">
               {(lesson as { tips: string[] }).tips.map((tip, i) => (
                 <div key={i} className="flex gap-2">
-                  <ArrowRight size={14} className="mt-0.5 shrink-0 text-[#6366F1]" />
-                  <p className="text-sm text-[#94A3B8]">{tip}</p>
+                  <ArrowRight size={14} className="mt-0.5 shrink-0 text-maroon" />
+                  <p className="text-sm text-ink-soft">{tip}</p>
                 </div>
               ))}
             </div>
@@ -255,23 +264,23 @@ function LessonCard({ lesson, index }: { lesson: typeof LESSONS[0]; index: numbe
           {"dos" in lesson && (
             <div className="grid gap-3 sm:grid-cols-2">
               <div>
-                <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-emerald-400">Do</p>
+                <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-forest">Do</p>
                 <div className="flex flex-col gap-1.5">
                   {(lesson as { dos: string[] }).dos.map((d, i) => (
                     <div key={i} className="flex gap-2">
-                      <CheckCircle2 size={13} className="mt-0.5 shrink-0 text-emerald-400" />
-                      <p className="text-sm text-[#94A3B8]">{d}</p>
+                      <CheckCircle2 size={13} className="mt-0.5 shrink-0 text-forest" />
+                      <p className="text-sm text-ink-soft">{d}</p>
                     </div>
                   ))}
                 </div>
               </div>
               <div>
-                <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-rose-400">Don&apos;t</p>
+                <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-maroon">Don&apos;t</p>
                 <div className="flex flex-col gap-1.5">
                   {(lesson as { donts: string[] }).donts.map((d, i) => (
                     <div key={i} className="flex gap-2">
-                      <span className="mt-0.5 shrink-0 text-rose-400 text-xs">✕</span>
-                      <p className="text-sm text-[#94A3B8]">{d}</p>
+                      <span className="mt-0.5 shrink-0 text-maroon text-xs">✕</span>
+                      <p className="text-sm text-ink-soft">{d}</p>
                     </div>
                   ))}
                 </div>
@@ -284,12 +293,12 @@ function LessonCard({ lesson, index }: { lesson: typeof LESSONS[0]; index: numbe
             <div className="flex flex-col gap-3">
               {(lesson as { steps: { step: string; desc: string }[] }).steps.map((s, i) => (
                 <div key={i} className="flex gap-3">
-                  <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-[#6366F1]/20 text-xs font-bold text-[#6366F1]">
+                  <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-maroon/15 text-xs font-bold text-maroon">
                     {i + 1}
                   </span>
                   <div>
-                    <p className="text-sm font-semibold text-[#F1F5F9]">{s.step}</p>
-                    <p className="text-xs text-[#94A3B8]">{s.desc}</p>
+                    <p className="text-sm font-semibold text-ink">{s.step}</p>
+                    <p className="text-xs text-ink-soft">{s.desc}</p>
                   </div>
                 </div>
               ))}
@@ -301,16 +310,16 @@ function LessonCard({ lesson, index }: { lesson: typeof LESSONS[0]; index: numbe
             <div className="flex flex-col gap-5">
               {(lesson as { formats: { name: string; speeches: { speech: string; time: string; desc: string }[] }[] }).formats.map((fmt) => (
                 <div key={fmt.name}>
-                  <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-[#6366F1]">{fmt.name}</p>
+                  <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-maroon">{fmt.name}</p>
                   <div className="flex flex-col gap-1.5">
                     {fmt.speeches.map((s, i) => (
-                      <div key={i} className="flex items-center gap-3 rounded-xl border border-[#1E293B] bg-[#0A0F1E] p-3">
-                        <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-[#1a2236] text-xs font-bold text-[#94A3B8]">{i + 1}</span>
+                      <div key={i} className="flex items-center gap-3 rounded-md border border-ink/10 bg-paper-dim p-3">
+                        <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-ink/5 text-xs font-bold text-ink-soft">{i + 1}</span>
                         <div className="flex-1 min-w-0">
-                          <p className="text-sm font-semibold text-[#F1F5F9]">{s.speech}</p>
-                          {s.desc && <p className="text-xs text-[#94A3B8]">{s.desc}</p>}
+                          <p className="text-sm font-semibold text-ink">{s.speech}</p>
+                          {s.desc && <p className="text-xs text-ink-soft">{s.desc}</p>}
                         </div>
-                        <span className="shrink-0 rounded-full bg-[#6366F1]/20 px-2 py-0.5 text-xs text-[#6366F1]">{s.time}</span>
+                        <span className="shrink-0 rounded-full bg-maroon/15 px-2 py-0.5 text-xs text-maroon">{s.time}</span>
                       </div>
                     ))}
                   </div>
@@ -324,18 +333,18 @@ function LessonCard({ lesson, index }: { lesson: typeof LESSONS[0]; index: numbe
             <div className="flex flex-col gap-2">
               {(lesson as { tips: string[] }).tips.map((tip, i) => (
                 <div key={i} className="flex gap-2">
-                  <ArrowRight size={14} className="mt-0.5 shrink-0 text-[#6366F1]" />
-                  <p className="text-sm text-[#94A3B8]">{tip}</p>
+                  <ArrowRight size={14} className="mt-0.5 shrink-0 text-maroon" />
+                  <p className="text-sm text-ink-soft">{tip}</p>
                 </div>
               ))}
             </div>
           )}
 
           {/* Takeaway */}
-          <div className="rounded-xl border border-[#6366F1]/30 bg-[#6366F1]/10 px-4 py-3">
+          <div className="rounded-md border border-maroon/30 bg-maroon/10 px-4 py-3">
             <div className="flex gap-2">
-              <Lightbulb size={14} className="mt-0.5 shrink-0 text-[#6366F1]" />
-              <p className="text-sm font-medium text-[#F1F5F9]">{lesson.takeaway}</p>
+              <Lightbulb size={14} className="mt-0.5 shrink-0 text-maroon" />
+              <p className="text-sm font-medium text-ink">{lesson.takeaway}</p>
             </div>
           </div>
         </div>
@@ -346,92 +355,92 @@ function LessonCard({ lesson, index }: { lesson: typeof LESSONS[0]; index: numbe
 
 function FeedbackPanel({ feedback }: { feedback: DebateLevel1Feedback }) {
   const scoreColor =
-    feedback.overallScore >= 8 ? "text-emerald-400"
-    : feedback.overallScore >= 5 ? "text-amber-400"
-    : "text-rose-400";
+    feedback.overallScore >= 8 ? "text-forest"
+    : feedback.overallScore >= 5 ? "text-[#8a6b28]"
+    : "text-maroon";
 
   return (
     <div className="flex flex-col gap-4">
       {/* Score + Encouragement */}
-      <div className="rounded-2xl border border-[#6366F1]/30 bg-[#6366F1]/10 p-5">
+      <div className="rounded-lg border border-maroon/30 bg-maroon/10 p-5">
         <div className="mb-3 flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <Star size={16} className="text-[#6366F1]" />
-            <span className="text-xs font-semibold uppercase tracking-wide text-[#6366F1]">Coach Feedback</span>
+            <Star size={16} className="text-maroon" />
+            <span className="text-xs font-semibold uppercase tracking-wide text-maroon">Coach Feedback</span>
           </div>
           <span className={clsx("text-2xl font-bold", scoreColor)}>
             {feedback.overallScore}/10
           </span>
         </div>
-        <p className="text-sm leading-relaxed text-[#F1F5F9]">{feedback.encouragement}</p>
+        <p className="text-sm leading-relaxed text-ink">{feedback.encouragement}</p>
       </div>
 
       {/* CWI Breakdown */}
-      <div className="glass-card rounded-2xl p-5">
-        <p className="mb-3 text-xs font-semibold uppercase tracking-wide text-[#94A3B8]">CWI Breakdown</p>
+      <div className="glass-card rounded-lg p-5">
+        <p className="mb-3 text-xs font-semibold uppercase tracking-wide text-ink-soft">CWI Breakdown</p>
         <div className="flex flex-col gap-3">
           {[
-            { label: "Claim", color: "text-indigo-400", borderColor: "border-indigo-500/30", bg: "bg-indigo-500/10", data: feedback.claimAnalysis },
-            { label: "Warrant", color: "text-purple-400", borderColor: "border-purple-500/30", bg: "bg-purple-500/10", data: feedback.warrantAnalysis },
-            { label: "Impact", color: "text-amber-400", borderColor: "border-amber-500/30", bg: "bg-amber-500/10", data: feedback.impactAnalysis },
+            { label: "Claim", color: "text-maroon", borderColor: "border-maroon/30", bg: "bg-maroon/10", data: feedback.claimAnalysis },
+            { label: "Warrant", color: "text-maroon", borderColor: "border-maroon/30", bg: "bg-maroon/10", data: feedback.warrantAnalysis },
+            { label: "Impact", color: "text-[#8a6b28]", borderColor: "border-gold/30", bg: "bg-gold/10", data: feedback.impactAnalysis },
           ].map(({ label, color, borderColor, bg, data }) => (
-            <div key={label} className={clsx("rounded-xl border p-3", borderColor, bg)}>
+            <div key={label} className={clsx("rounded-md border p-3", borderColor, bg)}>
               <div className="mb-1 flex items-center gap-2">
                 <span className={clsx("text-xs font-bold", color)}>{label}</span>
                 {data.found
-                  ? <CheckCircle2 size={12} className="text-emerald-400" />
-                  : <span className="text-xs text-rose-400">Missing</span>
+                  ? <CheckCircle2 size={12} className="text-forest" />
+                  : <span className="text-xs text-maroon">Missing</span>
                 }
               </div>
               {data.quote && (
-                <p className="mb-1.5 rounded bg-black/20 px-2 py-1 text-xs italic text-[#94A3B8]">
+                <p className="mb-1.5 rounded bg-black/20 px-2 py-1 text-xs italic text-ink-soft">
                   &ldquo;{data.quote}&rdquo;
                 </p>
               )}
-              <p className="text-xs text-[#94A3B8]">{data.feedback}</p>
+              <p className="text-xs text-ink-soft">{data.feedback}</p>
             </div>
           ))}
         </div>
       </div>
 
       {/* Strengths */}
-      <div className="glass-card rounded-2xl p-5">
-        <p className="mb-3 text-xs font-semibold uppercase tracking-wide text-emerald-400">What You Did Well</p>
+      <div className="glass-card rounded-lg p-5">
+        <p className="mb-3 text-xs font-semibold uppercase tracking-wide text-forest">What You Did Well</p>
         <div className="flex flex-col gap-2">
           {feedback.strengths.map((s, i) => (
             <div key={i} className="flex gap-2">
-              <CheckCircle2 size={14} className="mt-0.5 shrink-0 text-emerald-400" />
-              <p className="text-sm text-[#F1F5F9]">{s}</p>
+              <CheckCircle2 size={14} className="mt-0.5 shrink-0 text-forest" />
+              <p className="text-sm text-ink">{s}</p>
             </div>
           ))}
         </div>
       </div>
 
       {/* Improvements */}
-      <div className="glass-card rounded-2xl p-5">
-        <p className="mb-3 text-xs font-semibold uppercase tracking-wide text-amber-400">To Improve</p>
+      <div className="glass-card rounded-lg p-5">
+        <p className="mb-3 text-xs font-semibold uppercase tracking-wide text-[#8a6b28]">To Improve</p>
         <div className="flex flex-col gap-2">
           {feedback.improvements.map((imp, i) => (
             <div key={i} className="flex gap-2">
-              <ArrowRight size={14} className="mt-0.5 shrink-0 text-amber-400" />
-              <p className="text-sm text-[#94A3B8]">{imp}</p>
+              <ArrowRight size={14} className="mt-0.5 shrink-0 text-[#8a6b28]" />
+              <p className="text-sm text-ink-soft">{imp}</p>
             </div>
           ))}
         </div>
       </div>
 
       {/* Rewrite Example */}
-      <div className="glass-card rounded-2xl p-5">
-        <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-[#6366F1]">How to Rewrite It</p>
-        <p className="text-sm italic leading-relaxed text-[#94A3B8]">&ldquo;{feedback.rewriteExample}&rdquo;</p>
+      <div className="glass-card rounded-lg p-5">
+        <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-maroon">How to Rewrite It</p>
+        <p className="text-sm italic leading-relaxed text-ink-soft">&ldquo;{feedback.rewriteExample}&rdquo;</p>
       </div>
 
       {/* Next Step */}
-      <div className="flex items-start gap-3 rounded-xl border border-[#1E293B] bg-[#111827] p-4">
-        <Zap size={16} className="mt-0.5 shrink-0 text-[#F59E0B]" />
+      <div className="flex items-start gap-3 rounded-md border border-ink/10 bg-paper-dim p-4">
+        <Zap size={16} className="mt-0.5 shrink-0 text-[#8a6b28]" />
         <div>
-          <p className="mb-0.5 text-xs font-semibold text-[#F59E0B]">Next Step</p>
-          <p className="text-sm text-[#F1F5F9]">{feedback.nextStep}</p>
+          <p className="mb-0.5 text-xs font-semibold text-[#8a6b28]">Next Step</p>
+          <p className="text-sm text-ink">{feedback.nextStep}</p>
         </div>
       </div>
     </div>
@@ -480,21 +489,21 @@ export default function Level1() {
       {/* Header */}
       <div className="mb-8">
         <div className="mb-3 flex flex-wrap items-center gap-2">
-          <span className="rounded-full border border-indigo-500/30 bg-indigo-500/10 px-3 py-0.5 text-xs font-semibold text-indigo-400">
+          <span className="rounded-full border border-maroon/30 bg-maroon/10 px-3 py-0.5 text-xs font-semibold text-maroon">
             Level 1
           </span>
-          <span className="rounded-full border border-[#1E293B] px-3 py-0.5 text-xs text-[#94A3B8]">
+          <span className="rounded-full border border-ink/10 px-3 py-0.5 text-xs text-ink-soft">
             Foundations
           </span>
         </div>
-        <h1 className="mb-2 text-3xl font-bold text-[#F1F5F9]">Debate Foundations</h1>
-        <p className="text-[#94A3B8]">
+        <h1 className="mb-2 text-3xl font-bold text-ink">Debate Foundations</h1>
+        <p className="text-ink-soft">
           Learn how debate works, master the CWI argument model, and deliver your first speech — all from scratch.
         </p>
       </div>
 
       {/* Tabs */}
-      <div className="mb-8 flex gap-1 rounded-xl border border-[#1E293B] bg-[#111827] p-1">
+      <div className="mb-8 flex gap-1 rounded-md border border-ink/10 bg-paper-dim p-1">
         {(["learn", "practice"] as const).map((tab) => (
           <button
             key={tab}
@@ -502,8 +511,8 @@ export default function Level1() {
             className={clsx(
               "flex flex-1 items-center justify-center gap-2 rounded-lg py-2.5 text-sm font-semibold capitalize transition-colors",
               activeTab === tab
-                ? "bg-[#6366F1] text-white"
-                : "text-[#94A3B8] hover:text-[#F1F5F9]"
+                ? "bg-maroon text-paper"
+                : "text-ink-soft hover:text-ink"
             )}
           >
             {tab === "learn" ? <BookOpen size={14} /> : <Mic size={14} />}
@@ -520,7 +529,7 @@ export default function Level1() {
           ))}
           <button
             onClick={() => setActiveTab("practice")}
-            className="mt-2 flex w-full items-center justify-center gap-2 rounded-xl bg-[#6366F1] py-3.5 font-semibold text-white transition-colors hover:bg-[#4F46E5]"
+            className="mt-2 flex w-full items-center justify-center gap-2 rounded-md bg-maroon py-3.5 font-semibold text-paper transition-colors hover:bg-maroon-dark"
           >
             I&apos;m ready to practice <ArrowRight size={16} />
           </button>
@@ -533,7 +542,7 @@ export default function Level1() {
           <form onSubmit={handleSubmit} className="flex flex-col gap-5">
             {/* Topic Selector */}
             <div>
-              <label className="mb-2 block text-sm font-medium text-[#94A3B8]">
+              <label className="mb-2 block text-sm font-medium text-ink-soft">
                 Choose a debate topic
               </label>
               <div className="mb-3 grid gap-2 sm:grid-cols-2">
@@ -543,10 +552,10 @@ export default function Level1() {
                     type="button"
                     onClick={() => { setTopic(t); setCustomTopic(""); }}
                     className={clsx(
-                      "rounded-xl border px-4 py-2.5 text-left text-sm transition-all",
+                      "rounded-md border px-4 py-2.5 text-left text-sm transition-all",
                       topic === t && !customTopic
-                        ? "border-[#6366F1] bg-[#6366F1]/10 text-[#F1F5F9] ring-1 ring-[#6366F1]"
-                        : "border-[#1E293B] bg-[#111827] text-[#94A3B8] hover:border-[#6366F1]/50"
+                        ? "border-maroon bg-maroon/10 text-ink ring-1 ring-maroon"
+                        : "border-ink/10 bg-paper-dim text-ink-soft hover:border-maroon/50"
                     )}
                   >
                     {t}
@@ -558,13 +567,13 @@ export default function Level1() {
                 placeholder="Or type your own topic…"
                 value={customTopic}
                 onChange={(e) => setCustomTopic(e.target.value)}
-                className="w-full rounded-xl border border-[#1E293B] bg-[#111827] px-4 py-3 text-sm text-[#F1F5F9] placeholder-[#94A3B8]/60 outline-none transition-colors focus:border-[#6366F1] focus:ring-1 focus:ring-[#6366F1]"
+                className="w-full rounded-md border border-ink/10 bg-paper-dim px-4 py-3 text-sm text-ink placeholder-stone/60 outline-none transition-colors focus:border-maroon focus:ring-1 focus:ring-maroon"
               />
             </div>
 
             {/* Speech Type */}
             <div>
-              <label className="mb-2 block text-sm font-medium text-[#94A3B8]">Speech type</label>
+              <label className="mb-2 block text-sm font-medium text-ink-soft">Speech type</label>
               <div className="flex gap-2">
                 {SPEECH_TYPES.map((t) => (
                   <button
@@ -572,10 +581,10 @@ export default function Level1() {
                     type="button"
                     onClick={() => setSpeechType(t)}
                     className={clsx(
-                      "flex-1 rounded-xl border py-2.5 text-sm font-medium transition-all",
+                      "flex-1 rounded-md border py-2.5 text-sm font-medium transition-all",
                       speechType === t
-                        ? "border-[#6366F1] bg-[#6366F1]/10 text-[#F1F5F9] ring-1 ring-[#6366F1]"
-                        : "border-[#1E293B] bg-[#111827] text-[#94A3B8] hover:border-[#6366F1]/50"
+                        ? "border-maroon bg-maroon/10 text-ink ring-1 ring-maroon"
+                        : "border-ink/10 bg-paper-dim text-ink-soft hover:border-maroon/50"
                     )}
                   >
                     {t}
@@ -587,12 +596,12 @@ export default function Level1() {
             {/* Speech Text */}
             <div>
               <div className="mb-2 flex items-center justify-between">
-                <label className="text-sm font-medium text-[#94A3B8]">Write your speech</label>
-                <span className="text-xs text-[#94A3B8]/60">Aim for 2 minutes (~250–300 words)</span>
+                <label className="text-sm font-medium text-ink-soft">Write your speech</label>
+                <span className="text-xs text-stone/60">Aim for 2 minutes (~250–300 words)</span>
               </div>
-              <div className="mb-2 rounded-xl border border-[#1E293B] bg-[#111827]/50 px-4 py-3">
-                <p className="text-xs text-[#94A3B8]">
-                  💡 Remember: <span className="text-indigo-400">Claim</span> → <span className="text-purple-400">Warrant</span> → <span className="text-amber-400">Impact</span> for each argument
+              <div className="mb-2 rounded-md border border-ink/10 bg-paper-dim/50 px-4 py-3">
+                <p className="text-xs text-ink-soft">
+                  💡 Remember: <span className="text-maroon">Claim</span> → <span className="text-maroon">Warrant</span> → <span className="text-[#8a6b28]">Impact</span> for each argument
                 </p>
               </div>
               <textarea
@@ -600,21 +609,21 @@ export default function Level1() {
                 placeholder={`Write your ${speechType.toLowerCase()} here. Include at least 2 complete CWI arguments.\n\nExample start: "I stand in affirmation of the resolution that ${finalTopic}. My first argument is..."`}
                 value={speechText}
                 onChange={(e) => setSpeechText(e.target.value)}
-                className="w-full resize-y rounded-xl border border-[#1E293B] bg-[#111827] px-4 py-3 text-sm text-[#F1F5F9] placeholder-[#94A3B8]/50 outline-none transition-colors focus:border-[#6366F1] focus:ring-1 focus:ring-[#6366F1]"
+                className="w-full resize-y rounded-md border border-ink/10 bg-paper-dim px-4 py-3 text-sm text-ink placeholder-stone/50 outline-none transition-colors focus:border-maroon focus:ring-1 focus:ring-maroon"
               />
-              <p className="mt-1.5 text-right text-xs text-[#94A3B8]/50">{speechText.length} characters</p>
+              <p className="mt-1.5 text-right text-xs text-stone/50">{speechText.length} characters</p>
             </div>
 
-            {error && <p className="text-sm text-rose-400">{error}</p>}
+            {error && <p className="text-sm text-maroon">{error}</p>}
 
             <button
               type="submit"
               disabled={!canSubmit || loading}
               className={clsx(
-                "flex items-center justify-center gap-2 rounded-xl py-3.5 font-semibold transition-colors",
+                "flex items-center justify-center gap-2 rounded-md py-3.5 font-semibold transition-colors",
                 canSubmit && !loading
-                  ? "bg-[#6366F1] text-white hover:bg-[#4F46E5]"
-                  : "cursor-not-allowed bg-[#1E293B] text-[#94A3B8]"
+                  ? "bg-maroon text-paper hover:bg-maroon-dark"
+                  : "cursor-not-allowed bg-ink/10 text-ink-soft"
               )}
             >
               {loading ? (
@@ -625,13 +634,18 @@ export default function Level1() {
             </button>
           </form>
 
+          {/* Designed wait */}
+          {loading && <FeedbackSkeleton messages={ANALYZING_MESSAGES} rows={5} />}
+
           {/* Feedback */}
-          {feedback && (
+          {feedback && !loading && (
             <div id="feedback-panel">
-              <FeedbackPanel feedback={feedback} />
+              <ScoreReveal revealKey={feedback.overallScore}>
+                <FeedbackPanel feedback={feedback} />
+              </ScoreReveal>
               <button
                 onClick={() => { setFeedback(null); setSpeechText(""); }}
-                className="mt-4 w-full rounded-xl border border-[#1E293B] py-3 text-sm font-medium text-[#94A3B8] transition-colors hover:border-[#6366F1]/50 hover:text-[#F1F5F9]"
+                className="mt-4 w-full rounded-md border border-ink/10 py-3 text-sm font-medium text-ink-soft transition-colors hover:border-maroon/50 hover:text-ink"
               >
                 Try Again
               </button>

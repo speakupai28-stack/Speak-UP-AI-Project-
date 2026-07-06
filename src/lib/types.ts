@@ -200,6 +200,19 @@ export interface ResearchAnalysis {
   smartResearchTips: string[];
 }
 
+export interface CommitteeSpeechFeedback {
+  overallScore: number;
+  summary: string;
+  countryRepresentation: string;
+  speechStructure: string;
+  diplomaticLanguage: string;
+  strengths: string[];
+  improvements: string[];
+  improvedOpeningSentence: string;
+  suggestedOperativeClause: string;
+  nextStep: string;
+}
+
 export interface OnboardingProfile {
   greeting: string;
   tagline: string;

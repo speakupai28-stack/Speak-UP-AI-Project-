@@ -3,10 +3,19 @@
 import { useState } from "react";
 import { clsx } from "clsx";
 import { Trophy, ChevronDown, ChevronUp, Loader2, Send, ArrowRight, Lightbulb, Zap, AlertTriangle, CheckCircle2, XCircle, BookOpen, Mic } from "lucide-react";
+import { FeedbackSkeleton } from "@/components/ui/FeedbackSkeleton";
+import { ScoreReveal } from "@/components/motion/ScoreReveal";
+
+const JUDGING_MESSAGES = [
+  "Reading your round…",
+  "Checking judge adaptation and technical execution…",
+  "Finding your critical drops…",
+  "Writing your elite-level verdict…",
+];
 
 const LESSONS = [
   {
-    id: 1, icon: Trophy, color: "bg-amber-500", title: "Tournament Structure",
+    id: 1, icon: Trophy, color: "bg-maroon/10", title: "Tournament Structure",
     concept: "Understanding the bracket is essential for pacing your prep and energy across a tournament.",
     content: [
       { label: "Prelims", desc: "Usually 4-6 rounds to establish your record. Win more than you lose to break." },
@@ -17,7 +26,7 @@ const LESSONS = [
     takeaway: "Treat every prelim round like an elim. Judges talk — your reputation follows you through the bracket.",
   },
   {
-    id: 2, icon: BookOpen, color: "bg-indigo-500", title: "Judge Adaptation",
+    id: 2, icon: BookOpen, color: "bg-maroon/10", title: "Judge Adaptation",
     concept: "Reading your judge's paradigm and adjusting your style is a skill top debaters develop obsessively.",
     paradigms: [
       { type: "Flow Judge", icon: "📋", adjustments: "Go for technical arguments, extend dropped args, don't repeat yourself, collapse to 2 issues." },
@@ -39,7 +48,7 @@ const LESSONS = [
     takeaway: "Theory is a tool, not a weapon. Run it when you genuinely have a fairness violation — not just to waste time.",
   },
   {
-    id: 4, icon: BookOpen, color: "bg-purple-500", title: "Kritik Debate (K Debate)",
+    id: 4, icon: BookOpen, color: "bg-maroon/10", title: "Kritik Debate (K Debate)",
     concept: "A Kritik challenges the philosophical assumptions behind the resolution or the opponent's advocacy — not just their policy.",
     parts: [
       { name: "Link", desc: "How does the AFF's advocacy connect to the harm you're identifying?" },
@@ -50,7 +59,7 @@ const LESSONS = [
     takeaway: "Ks are high-reward, high-risk. Only run them if you understand the philosophy deeply enough to defend it under cross-ex.",
   },
   {
-    id: 5, icon: Mic, color: "bg-teal-500", title: "Speed & Clarity",
+    id: 5, icon: Mic, color: "bg-maroon/10", title: "Speed & Clarity",
     concept: "Speed (spreading) is a tool — use it strategically, not constantly.",
     rules: [
       "Tag-team evidence with your partner before increasing speed",
@@ -62,7 +71,7 @@ const LESSONS = [
     takeaway: "The best debaters speak at exactly the speed their judge can flow. Not one word per minute faster.",
   },
   {
-    id: 6, icon: AlertTriangle, color: "bg-rose-600", title: "Elimination Round Pressure",
+    id: 6, icon: AlertTriangle, color: "bg-maroon/10", title: "Elimination Round Pressure",
     concept: "Elim rounds feel different — the nerves are real and they affect your performance if you're not prepared.",
     strategies: [
       "Do your prep the night before — don't try to write new blocks the morning of",
@@ -74,7 +83,7 @@ const LESSONS = [
     takeaway: "Pressure is the filter that shows who prepared. Prepare more than anyone else in the bracket.",
   },
   {
-    id: 7, icon: BookOpen, color: "bg-cyan-500", title: "Post-Round Analysis",
+    id: 7, icon: BookOpen, color: "bg-maroon/10", title: "Post-Round Analysis",
     concept: "What you do AFTER a round determines how fast you improve before the next one.",
     steps: [
       { step: "1. Write it down immediately", desc: "What arguments were run? What was your response? What did the judge say?" },
@@ -85,7 +94,7 @@ const LESSONS = [
     takeaway: "The round isn't over when the judge decides. It's over when you've extracted every lesson from it.",
   },
   {
-    id: 8, icon: Trophy, color: "bg-amber-600", title: "Practice: Full Round Simulation",
+    id: 8, icon: Trophy, color: "bg-gold/10", title: "Practice: Full Round Simulation",
     concept: "Write a complete final focus or last rebuttal speech on the topic below. This is elimination pressure — your judge paradigm matters.",
     tips: [
       "Pick your 2 best winning arguments and extend only those",
@@ -140,18 +149,18 @@ export default function Level3() {
     <div className="mx-auto max-w-4xl px-6 py-10">
       <div className="mb-8">
         <div className="mb-3 flex flex-wrap gap-2">
-          <span className="rounded-full border border-amber-500/30 bg-amber-500/10 px-3 py-0.5 text-xs font-semibold text-amber-400">Level 3</span>
-          <span className="rounded-full border border-[#1E293B] px-3 py-0.5 text-xs text-[#94A3B8]">Competition</span>
+          <span className="rounded-full border border-gold/30 bg-gold/10 px-3 py-0.5 text-xs font-semibold text-[#8a6b28]">Level 3</span>
+          <span className="rounded-full border border-ink/10 px-3 py-0.5 text-xs text-ink-soft">Competition</span>
         </div>
-        <h1 className="mb-2 text-3xl font-bold text-[#F1F5F9]">Competition Debate</h1>
-        <p className="text-[#94A3B8]">Tournament prep, judge adaptation, and elite-level technical debate. Brutally honest feedback only.</p>
+        <h1 className="mb-2 text-3xl font-bold text-ink">Competition Debate</h1>
+        <p className="text-ink-soft">Tournament prep, judge adaptation, and elite-level technical debate. Brutally honest feedback only.</p>
       </div>
 
-      <div className="mb-8 flex gap-1 rounded-xl border border-[#1E293B] bg-[#111827] p-1">
+      <div className="mb-8 flex gap-1 rounded-md border border-ink/10 bg-paper-dim p-1">
         {(["learn", "practice"] as const).map((t) => (
           <button key={t} onClick={() => setTab(t)}
             className={clsx("flex flex-1 items-center justify-center gap-2 rounded-lg py-2.5 text-sm font-semibold capitalize transition-colors",
-              tab === t ? "bg-[#6366F1] text-white" : "text-[#94A3B8] hover:text-[#F1F5F9]")}>
+              tab === t ? "bg-maroon text-paper" : "text-ink-soft hover:text-ink")}>
             {t === "learn" ? <BookOpen size={14} /> : <Trophy size={14} />}
             {t === "learn" ? "7 Lessons" : "Round Sim"}
           </button>
@@ -164,26 +173,26 @@ export default function Level3() {
             const Icon = lesson.icon;
             const open = openLesson === i;
             return (
-              <div key={lesson.id} className="glass-card overflow-hidden rounded-2xl">
+              <div key={lesson.id} className="glass-card overflow-hidden rounded-lg">
                 <button onClick={() => setOpenLesson(open ? -1 : i)} className="flex w-full items-center gap-4 p-5 text-left">
                   <div className={clsx("flex h-9 w-9 shrink-0 items-center justify-center rounded-lg", lesson.color)}>
-                    <Icon size={16} className="text-white" />
+                    <Icon size={16} className="text-maroon" />
                   </div>
                   <div className="flex-1">
-                    <span className="text-xs font-semibold text-[#94A3B8]">Lesson {lesson.id}</span>
-                    <p className="font-semibold text-[#F1F5F9]">{lesson.title}</p>
+                    <span className="text-xs font-semibold text-ink-soft">Lesson {lesson.id}</span>
+                    <p className="font-semibold text-ink">{lesson.title}</p>
                   </div>
-                  {open ? <ChevronUp size={16} className="shrink-0 text-[#94A3B8]" /> : <ChevronDown size={16} className="shrink-0 text-[#94A3B8]" />}
+                  {open ? <ChevronUp size={16} className="shrink-0 text-ink-soft" /> : <ChevronDown size={16} className="shrink-0 text-ink-soft" />}
                 </button>
                 {open && (
-                  <div className="border-t border-[#1E293B] px-5 pb-5 pt-4 space-y-4">
-                    <p className="text-sm leading-relaxed text-[#94A3B8]">{lesson.concept}</p>
+                  <div className="border-t border-ink/10 px-5 pb-5 pt-4 space-y-4">
+                    <p className="text-sm leading-relaxed text-ink-soft">{lesson.concept}</p>
                     {"content" in lesson && (
                       <div className="grid gap-2 sm:grid-cols-2">
                         {(lesson as {content:{label:string;desc:string}[]}).content.map((c) => (
-                          <div key={c.label} className="rounded-xl border border-[#1E293B] bg-[#0A0F1E] p-3">
-                            <p className="mb-1 text-sm font-semibold text-[#F1F5F9]">{c.label}</p>
-                            <p className="text-xs text-[#94A3B8]">{c.desc}</p>
+                          <div key={c.label} className="rounded-md border border-ink/10 bg-paper-dim p-3">
+                            <p className="mb-1 text-sm font-semibold text-ink">{c.label}</p>
+                            <p className="text-xs text-ink-soft">{c.desc}</p>
                           </div>
                         ))}
                       </div>
@@ -191,9 +200,9 @@ export default function Level3() {
                     {"paradigms" in lesson && (
                       <div className="flex flex-col gap-2">
                         {(lesson as {paradigms:{type:string;icon:string;adjustments:string}[]}).paradigms.map((p) => (
-                          <div key={p.type} className="rounded-xl border border-[#1E293B] bg-[#0A0F1E] p-3">
-                            <p className="mb-1 text-sm font-semibold text-[#F1F5F9]">{p.icon} {p.type}</p>
-                            <p className="text-xs text-[#94A3B8]">{p.adjustments}</p>
+                          <div key={p.type} className="rounded-md border border-ink/10 bg-paper-dim p-3">
+                            <p className="mb-1 text-sm font-semibold text-ink">{p.icon} {p.type}</p>
+                            <p className="text-xs text-ink-soft">{p.adjustments}</p>
                           </div>
                         ))}
                       </div>
@@ -201,52 +210,52 @@ export default function Level3() {
                     {"arguments" in lesson && (
                       <div className="flex flex-col gap-2">
                         {(lesson as {arguments:{name:string;desc:string}[]}).arguments.map((a) => (
-                          <div key={a.name} className="rounded-xl border border-[#1E293B] bg-[#0A0F1E] p-3">
-                            <p className="mb-1 text-sm font-semibold text-[#F1F5F9]">{a.name}</p>
-                            <p className="text-xs text-[#94A3B8]">{a.desc}</p>
+                          <div key={a.name} className="rounded-md border border-ink/10 bg-paper-dim p-3">
+                            <p className="mb-1 text-sm font-semibold text-ink">{a.name}</p>
+                            <p className="text-xs text-ink-soft">{a.desc}</p>
                           </div>
                         ))}
-                        {"structure" in lesson && <div className="rounded-xl border border-rose-500/30 bg-rose-500/10 p-3"><p className="text-xs font-semibold text-rose-400">Structure: {(lesson as {structure:string}).structure}</p></div>}
+                        {"structure" in lesson && <div className="rounded-md border border-maroon/30 bg-maroon/10 p-3"><p className="text-xs font-semibold text-maroon">Structure: {(lesson as {structure:string}).structure}</p></div>}
                       </div>
                     )}
                     {"parts" in lesson && (
                       <div className="flex flex-col gap-2">
                         {(lesson as {parts:{name:string;desc:string}[]}).parts.map((p, idx) => (
                           <div key={idx} className="flex gap-3">
-                            <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-[#6366F1]/20 text-xs font-bold text-[#6366F1]">{idx+1}</span>
-                            <div><p className="text-sm font-semibold text-[#F1F5F9]">{p.name}</p><p className="text-xs text-[#94A3B8]">{p.desc}</p></div>
+                            <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-maroon/15 text-xs font-bold text-maroon">{idx+1}</span>
+                            <div><p className="text-sm font-semibold text-ink">{p.name}</p><p className="text-xs text-ink-soft">{p.desc}</p></div>
                           </div>
                         ))}
                       </div>
                     )}
                     {"rules" in lesson && (lesson as {rules:string[]}).rules.map((r, idx) => (
-                      <div key={idx} className="flex gap-2"><ArrowRight size={14} className="mt-0.5 shrink-0 text-[#6366F1]" /><p className="text-sm text-[#94A3B8]">{r}</p></div>
+                      <div key={idx} className="flex gap-2"><ArrowRight size={14} className="mt-0.5 shrink-0 text-maroon" /><p className="text-sm text-ink-soft">{r}</p></div>
                     ))}
                     {"strategies" in lesson && (lesson as {strategies:string[]}).strategies.map((s, idx) => (
-                      <div key={idx} className="flex gap-2"><ArrowRight size={14} className="mt-0.5 shrink-0 text-[#6366F1]" /><p className="text-sm text-[#94A3B8]">{s}</p></div>
+                      <div key={idx} className="flex gap-2"><ArrowRight size={14} className="mt-0.5 shrink-0 text-maroon" /><p className="text-sm text-ink-soft">{s}</p></div>
                     ))}
                     {"steps" in lesson && (
                       <div className="flex flex-col gap-3">
                         {(lesson as {steps:{step:string;desc:string}[]}).steps.map((s, idx) => (
                           <div key={idx} className="flex gap-3">
-                            <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-[#6366F1]/20 text-xs font-bold text-[#6366F1]">{idx+1}</span>
-                            <div><p className="text-sm font-semibold text-[#F1F5F9]">{s.step}</p><p className="text-xs text-[#94A3B8]">{s.desc}</p></div>
+                            <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-maroon/15 text-xs font-bold text-maroon">{idx+1}</span>
+                            <div><p className="text-sm font-semibold text-ink">{s.step}</p><p className="text-xs text-ink-soft">{s.desc}</p></div>
                           </div>
                         ))}
                       </div>
                     )}
                     {"tips" in lesson && (lesson as {tips:string[]}).tips.map((tip, idx) => (
-                      <div key={idx} className="flex gap-2"><ArrowRight size={14} className="mt-0.5 shrink-0 text-[#6366F1]" /><p className="text-sm text-[#94A3B8]">{tip}</p></div>
+                      <div key={idx} className="flex gap-2"><ArrowRight size={14} className="mt-0.5 shrink-0 text-maroon" /><p className="text-sm text-ink-soft">{tip}</p></div>
                     ))}
-                    <div className="rounded-xl border border-[#6366F1]/30 bg-[#6366F1]/10 px-4 py-3">
-                      <div className="flex gap-2"><Lightbulb size={14} className="mt-0.5 shrink-0 text-[#6366F1]" /><p className="text-sm font-medium text-[#F1F5F9]">{lesson.takeaway}</p></div>
+                    <div className="rounded-md border border-maroon/30 bg-maroon/10 px-4 py-3">
+                      <div className="flex gap-2"><Lightbulb size={14} className="mt-0.5 shrink-0 text-maroon" /><p className="text-sm font-medium text-ink">{lesson.takeaway}</p></div>
                     </div>
                   </div>
                 )}
               </div>
             );
           })}
-          <button onClick={() => setTab("practice")} className="mt-2 flex w-full items-center justify-center gap-2 rounded-xl bg-[#6366F1] py-3.5 font-semibold text-white hover:bg-[#4F46E5]">
+          <button onClick={() => setTab("practice")} className="mt-2 flex w-full items-center justify-center gap-2 rounded-md bg-maroon py-3.5 font-semibold text-paper hover:bg-maroon-dark">
             Enter the round <ArrowRight size={16} />
           </button>
         </div>
@@ -254,17 +263,17 @@ export default function Level3() {
 
       {tab === "practice" && (
         <div className="flex flex-col gap-5">
-          <div className="rounded-xl border border-rose-500/30 bg-rose-500/10 px-4 py-3">
-            <p className="text-xs font-semibold text-rose-400">Elite-level feedback. No sugarcoating.</p>
+          <div className="rounded-md border border-maroon/30 bg-maroon/10 px-4 py-3">
+            <p className="text-xs font-semibold text-maroon">Elite-level feedback. No sugarcoating.</p>
           </div>
           <form onSubmit={handleSubmit} className="flex flex-col gap-5">
             <div>
-              <label className="mb-2 block text-sm font-medium text-[#94A3B8]">Topic</label>
+              <label className="mb-2 block text-sm font-medium text-ink-soft">Topic</label>
               <div className="grid gap-2 sm:grid-cols-2">
                 {TOPICS.map((t) => (
                   <button key={t} type="button" onClick={() => setTopic(t)}
-                    className={clsx("rounded-xl border px-4 py-2.5 text-left text-sm transition-all",
-                      topic === t ? "border-[#6366F1] bg-[#6366F1]/10 text-[#F1F5F9] ring-1 ring-[#6366F1]" : "border-[#1E293B] bg-[#111827] text-[#94A3B8] hover:border-[#6366F1]/50")}>
+                    className={clsx("rounded-md border px-4 py-2.5 text-left text-sm transition-all",
+                      topic === t ? "border-maroon bg-maroon/10 text-ink ring-1 ring-maroon" : "border-ink/10 bg-paper-dim text-ink-soft hover:border-maroon/50")}>
                     {t}
                   </button>
                 ))}
@@ -272,24 +281,24 @@ export default function Level3() {
             </div>
             <div className="grid gap-4 sm:grid-cols-2">
               <div>
-                <label className="mb-2 block text-sm font-medium text-[#94A3B8]">Speech Type</label>
+                <label className="mb-2 block text-sm font-medium text-ink-soft">Speech Type</label>
                 <div className="flex flex-col gap-2">
                   {SPEECH_TYPES.map((t) => (
                     <button key={t} type="button" onClick={() => setSpeechType(t)}
-                      className={clsx("rounded-xl border px-4 py-2.5 text-sm font-medium transition-all",
-                        speechType === t ? "border-[#6366F1] bg-[#6366F1]/10 text-[#F1F5F9]" : "border-[#1E293B] bg-[#111827] text-[#94A3B8]")}>
+                      className={clsx("rounded-md border px-4 py-2.5 text-sm font-medium transition-all",
+                        speechType === t ? "border-maroon bg-maroon/10 text-ink" : "border-ink/10 bg-paper-dim text-ink-soft")}>
                       {t}
                     </button>
                   ))}
                 </div>
               </div>
               <div>
-                <label className="mb-2 block text-sm font-medium text-[#94A3B8]">Judge Paradigm</label>
+                <label className="mb-2 block text-sm font-medium text-ink-soft">Judge Paradigm</label>
                 <div className="flex flex-col gap-2">
                   {JUDGE_PARADIGMS.map((j) => (
                     <button key={j} type="button" onClick={() => setJudgeParadigm(j)}
-                      className={clsx("rounded-xl border px-4 py-2.5 text-sm font-medium transition-all",
-                        judgeParadigm === j ? "border-amber-500/50 bg-amber-500/10 text-amber-400" : "border-[#1E293B] bg-[#111827] text-[#94A3B8]")}>
+                      className={clsx("rounded-md border px-4 py-2.5 text-sm font-medium transition-all",
+                        judgeParadigm === j ? "border-gold/50 bg-gold/10 text-[#8a6b28]" : "border-ink/10 bg-paper-dim text-ink-soft")}>
                       {j}
                     </button>
                   ))}
@@ -297,31 +306,33 @@ export default function Level3() {
               </div>
             </div>
             <div>
-              <label className="mb-2 block text-sm font-medium text-[#94A3B8]">Your Speech</label>
+              <label className="mb-2 block text-sm font-medium text-ink-soft">Your Speech</label>
               <textarea rows={10} placeholder="Write your final speech. Collapse to your 2 best arguments. Weigh impacts explicitly. Make it count." value={speechText} onChange={(e) => setSpeechText(e.target.value)}
-                className="w-full resize-y rounded-xl border border-[#1E293B] bg-[#111827] px-4 py-3 text-sm text-[#F1F5F9] placeholder-[#94A3B8]/50 outline-none focus:border-[#6366F1] focus:ring-1 focus:ring-[#6366F1]" />
+                className="w-full resize-y rounded-md border border-ink/10 bg-paper-dim px-4 py-3 text-sm text-ink placeholder-stone/50 outline-none focus:border-maroon focus:ring-1 focus:ring-maroon" />
             </div>
-            {error && <p className="text-sm text-rose-400">{error}</p>}
+            {error && <p className="text-sm text-maroon">{error}</p>}
             <button type="submit" disabled={speechText.trim().length < 30 || loading}
-              className={clsx("flex items-center justify-center gap-2 rounded-xl py-3.5 font-semibold transition-colors",
-                speechText.trim().length >= 30 && !loading ? "bg-[#6366F1] text-white hover:bg-[#4F46E5]" : "cursor-not-allowed bg-[#1E293B] text-[#94A3B8]")}>
+              className={clsx("flex items-center justify-center gap-2 rounded-md py-3.5 font-semibold transition-colors",
+                speechText.trim().length >= 30 && !loading ? "bg-maroon text-paper hover:bg-maroon-dark" : "cursor-not-allowed bg-ink/10 text-ink-soft")}>
               {loading ? <><Loader2 size={16} className="animate-spin" /> Judging your round…</> : <><Send size={16} /> Submit for Elite Feedback</>}
             </button>
+
+            {loading && <FeedbackSkeleton messages={JUDGING_MESSAGES} rows={5} />}
           </form>
 
-          {feedback && (
-            <div id="l3-feedback" className="flex flex-col gap-4">
-              <div className={clsx("rounded-2xl border p-5", feedback.tournamentReady ? "border-emerald-500/30 bg-emerald-500/10" : "border-rose-500/30 bg-rose-500/10")}>
+          {feedback && !loading && (
+            <ScoreReveal revealKey={feedback.overallScore as number} id="l3-feedback" className="flex flex-col gap-4">
+              <div className={clsx("rounded-lg border p-5", feedback.tournamentReady ? "border-forest/30 bg-forest/10" : "border-maroon/30 bg-maroon/10")}>
                 <div className="mb-2 flex items-center justify-between">
                   <div className="flex items-center gap-2">
-                    {feedback.tournamentReady ? <CheckCircle2 size={14} className="text-emerald-400" /> : <XCircle size={14} className="text-rose-400" />}
-                    <span className={clsx("text-xs font-semibold uppercase", feedback.tournamentReady ? "text-emerald-400" : "text-rose-400")}>
+                    {feedback.tournamentReady ? <CheckCircle2 size={14} className="text-forest" /> : <XCircle size={14} className="text-maroon" />}
+                    <span className={clsx("text-xs font-semibold uppercase", feedback.tournamentReady ? "text-forest" : "text-maroon")}>
                       {feedback.tournamentReady ? "Tournament Ready" : "Not Tournament Ready"}
                     </span>
                   </div>
-                  <span className="text-2xl font-bold text-[#F1F5F9]">{feedback.overallScore as number}/10</span>
+                  <span className="text-2xl font-bold text-ink">{feedback.overallScore as number}/10</span>
                 </div>
-                <p className="text-sm text-[#F1F5F9]">{feedback.roundVerdict as string}</p>
+                <p className="text-sm text-ink">{feedback.roundVerdict as string}</p>
               </div>
               {[
                 { key: "technicalBreakdown", label: "Technical Breakdown" },
@@ -329,29 +340,29 @@ export default function Level3() {
                 { key: "eliteLevel", label: "What Separates This from Finals Level" },
                 { key: "speedClarity", label: "Speed & Clarity" },
               ].map(({ key, label }) => (
-                <div key={key} className="glass-card rounded-2xl p-5">
-                  <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-[#94A3B8]">{label}</p>
-                  <p className="text-sm leading-relaxed text-[#94A3B8]">{feedback[key] as string}</p>
+                <div key={key} className="glass-card rounded-lg p-5">
+                  <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-ink-soft">{label}</p>
+                  <p className="text-sm leading-relaxed text-ink-soft">{feedback[key] as string}</p>
                 </div>
               ))}
-              <div className="glass-card rounded-2xl p-5">
-                <p className="mb-3 text-xs font-semibold uppercase tracking-wide text-rose-400">Critical Drops</p>
+              <div className="glass-card rounded-lg p-5">
+                <p className="mb-3 text-xs font-semibold uppercase tracking-wide text-maroon">Critical Drops</p>
                 <div className="flex flex-col gap-2">
                   {(feedback.criticalDrops as string[]).map((drop, i) => (
-                    <div key={i} className="flex gap-2"><XCircle size={13} className="mt-0.5 shrink-0 text-rose-400" /><p className="text-sm text-[#94A3B8]">{drop}</p></div>
+                    <div key={i} className="flex gap-2"><XCircle size={13} className="mt-0.5 shrink-0 text-maroon" /><p className="text-sm text-ink-soft">{drop}</p></div>
                   ))}
                 </div>
               </div>
-              <div className="glass-card rounded-2xl p-5">
-                <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-amber-400">Pressure Points</p>
-                <p className="text-sm text-[#94A3B8]">{feedback.pressurePoints as string}</p>
+              <div className="glass-card rounded-lg p-5">
+                <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-[#8a6b28]">Pressure Points</p>
+                <p className="text-sm text-ink-soft">{feedback.pressurePoints as string}</p>
               </div>
-              <div className="flex items-start gap-3 rounded-xl border border-amber-500/30 bg-amber-500/10 p-4">
-                <Zap size={16} className="mt-0.5 shrink-0 text-[#F59E0B]" />
-                <div><p className="mb-0.5 text-xs font-semibold text-[#F59E0B]">Fix Before Your Next Elim</p><p className="text-sm text-[#F1F5F9]">{feedback.elimRoundFix as string}</p></div>
+              <div className="flex items-start gap-3 rounded-md border border-gold/30 bg-gold/10 p-4">
+                <Zap size={16} className="mt-0.5 shrink-0 text-[#8a6b28]" />
+                <div><p className="mb-0.5 text-xs font-semibold text-[#8a6b28]">Fix Before Your Next Elim</p><p className="text-sm text-ink">{feedback.elimRoundFix as string}</p></div>
               </div>
-              <button onClick={() => { setFeedback(null); setSpeechText(""); }} className="rounded-xl border border-[#1E293B] py-3 text-sm font-medium text-[#94A3B8] hover:border-[#6366F1]/50">Try Again</button>
-            </div>
+              <button onClick={() => { setFeedback(null); setSpeechText(""); }} className="rounded-md border border-ink/10 py-3 text-sm font-medium text-ink-soft hover:border-maroon/50">Try Again</button>
+            </ScoreReveal>
           )}
         </div>
       )}

@@ -2,9 +2,18 @@
 
 import { useState, useEffect, useRef } from "react";
 import { clsx } from "clsx";
-import { Loader2, ArrowRight, CheckCircle2, RefreshCw, Timer, Zap } from "lucide-react";
+import { Loader2, RefreshCw, Timer, Zap } from "lucide-react";
+import { FeedbackSkeleton } from "@/components/ui/FeedbackSkeleton";
+import { ScoreReveal } from "@/components/motion/ScoreReveal";
 import { recordSession, getProgress } from "@/lib/progress";
 import type { RebuttalResult } from "@/lib/types";
+
+const GRADING_MESSAGES = [
+  "Reading your rebuttals…",
+  "Checking each response against the argument…",
+  "Finding your strongest line…",
+  "Writing your next drill…",
+];
 
 const ARGUMENTS_BY_LEVEL: Record<number, string[]> = {
   1: [
@@ -37,30 +46,24 @@ interface RebuttalTrainerProps {
 }
 
 export default function RebuttalTrainer({ level: propLevel }: RebuttalTrainerProps) {
-  const [level, setLevel] = useState(propLevel ?? 1);
+  const [level] = useState(() => propLevel ?? getProgress().level);
   const [argument, setArgument] = useState("");
   const [rebuttals, setRebuttals] = useState(["", "", ""]);
   const [timeLeft, setTimeLeft] = useState(TIME_LIMIT);
   const [timerActive, setTimerActive] = useState(false);
-  const [timeUp, setTimeUp] = useState(false);
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<RebuttalResult | null>(null);
   const [phase, setPhase] = useState<"setup" | "writing" | "feedback">("setup");
   const timerRef = useRef<NodeJS.Timeout | null>(null);
 
-  useEffect(() => {
-    const p = getProgress();
-    setLevel(propLevel ?? p.level);
-  }, [propLevel]);
+  const timeUp = phase === "writing" && timeLeft === 0;
 
   useEffect(() => {
-    if (timerActive && timeLeft > 0) {
-      timerRef.current = setTimeout(() => setTimeLeft((t) => t - 1), 1000);
-    } else if (timeLeft === 0 && timerActive) {
-      setTimerActive(false);
-      setTimeUp(true);
-    }
-    return () => { if (timerRef.current) clearTimeout(timerRef.current); };
+    if (!timerActive || timeLeft === 0) return;
+    timerRef.current = setTimeout(() => setTimeLeft((t) => t - 1), 1000);
+    return () => {
+      if (timerRef.current) clearTimeout(timerRef.current);
+    };
   }, [timerActive, timeLeft]);
 
   function pickArgument() {
@@ -70,7 +73,6 @@ export default function RebuttalTrainer({ level: propLevel }: RebuttalTrainerPro
     setRebuttals(["", "", ""]);
     setTimeLeft(TIME_LIMIT);
     setTimerActive(true);
-    setTimeUp(false);
     setResult(null);
     setPhase("writing");
   }
@@ -109,23 +111,22 @@ export default function RebuttalTrainer({ level: propLevel }: RebuttalTrainerPro
     setArgument("");
     setRebuttals(["", "", ""]);
     setResult(null);
-    setTimeUp(false);
     setTimeLeft(TIME_LIMIT);
   }
 
-  const timerColor = timeLeft > 30 ? "text-emerald-400" : timeLeft > 10 ? "text-amber-400" : "text-rose-400";
+  const timerColor = timeLeft > 30 ? "text-forest" : timeLeft > 10 ? "text-[#8a6b28]" : "text-maroon";
   const canSubmit = rebuttals.filter(Boolean).length >= 1;
 
   return (
     <div className="flex flex-col gap-5">
       {/* Header */}
-      <div className="glass-card rounded-2xl p-5">
+      <div className="glass-card rounded-lg p-5">
         <div className="mb-2 flex items-center gap-2">
-          <Zap size={16} className="text-[#F59E0B]" />
-          <span className="text-xs font-semibold uppercase tracking-wide text-[#F59E0B]">Rebuttal Trainer</span>
-          <span className="ml-auto rounded-full border border-[#1E293B] px-2 py-0.5 text-xs text-[#94A3B8]">Level {level}</span>
+          <Zap size={16} className="text-[#8a6b28]" />
+          <span className="text-xs font-semibold uppercase tracking-wide text-[#8a6b28]">Rebuttal Trainer</span>
+          <span className="ml-auto rounded-full border border-ink/10 px-2 py-0.5 text-xs text-ink-soft">Level {level}</span>
         </div>
-        <p className="text-sm text-[#94A3B8]">
+        <p className="text-sm text-ink-soft">
           {level === 1 && "An argument will appear. Give 3 rebuttals in 90 seconds. Focus on saying WHY it's wrong."}
           {level === 2 && "Attack the argument strategically. Find the link, turn the impact, or offer counter-evidence."}
           {level === 3 && "Run a complete rebuttal: deny the link, turn the impact, and weigh against their argument."}
@@ -135,7 +136,7 @@ export default function RebuttalTrainer({ level: propLevel }: RebuttalTrainerPro
       {/* Setup */}
       {phase === "setup" && (
         <button onClick={pickArgument}
-          className="flex items-center justify-center gap-2 rounded-xl bg-[#6366F1] py-4 font-semibold text-white hover:bg-[#4F46E5]">
+          className="flex items-center justify-center gap-2 rounded-md bg-maroon py-4 font-semibold text-paper hover:bg-maroon-dark">
           <Timer size={18} /> Start Rebuttal Challenge
         </button>
       )}
@@ -144,9 +145,9 @@ export default function RebuttalTrainer({ level: propLevel }: RebuttalTrainerPro
       {phase === "writing" && (
         <div className="flex flex-col gap-4">
           {/* Argument + Timer */}
-          <div className="rounded-2xl border border-[#6366F1]/30 bg-[#6366F1]/10 p-5">
+          <div className="rounded-lg border border-maroon/30 bg-maroon/10 p-5">
             <div className="mb-3 flex items-center justify-between">
-              <p className="text-xs font-semibold uppercase tracking-wide text-[#6366F1]">Argument to Attack</p>
+              <p className="text-xs font-semibold uppercase tracking-wide text-maroon">Argument to Attack</p>
               <div className="flex items-center gap-2">
                 <Timer size={14} className={timerColor} />
                 <span className={clsx("text-lg font-bold tabular-nums", timerColor)}>
@@ -154,12 +155,12 @@ export default function RebuttalTrainer({ level: propLevel }: RebuttalTrainerPro
                 </span>
               </div>
             </div>
-            <p className="text-base font-medium text-[#F1F5F9]">&ldquo;{argument}&rdquo;</p>
+            <p className="text-base font-medium text-ink">&ldquo;{argument}&rdquo;</p>
           </div>
 
           {timeUp && (
-            <div className="rounded-xl border border-rose-500/30 bg-rose-500/10 px-4 py-3">
-              <p className="text-sm font-semibold text-rose-400">Time&apos;s up — submit what you have!</p>
+            <div className="rounded-md border border-maroon/30 bg-maroon/10 px-4 py-3">
+              <p className="text-sm font-semibold text-maroon">Time&apos;s up — submit what you have!</p>
             </div>
           )}
 
@@ -167,7 +168,7 @@ export default function RebuttalTrainer({ level: propLevel }: RebuttalTrainerPro
           <div className="flex flex-col gap-3">
             {[0, 1, 2].map((i) => (
               <div key={i}>
-                <label className="mb-1.5 block text-xs font-semibold text-[#94A3B8]">
+                <label className="mb-1.5 block text-xs font-semibold text-ink-soft">
                   Rebuttal {i + 1} {i === 0 ? "(required)" : "(optional)"}
                 </label>
                 <textarea
@@ -179,60 +180,62 @@ export default function RebuttalTrainer({ level: propLevel }: RebuttalTrainerPro
                   }
                   value={rebuttals[i]}
                   onChange={(e) => updateRebuttal(i, e.target.value)}
-                  className="w-full resize-none rounded-xl border border-[#1E293B] bg-[#111827] px-4 py-3 text-sm text-[#F1F5F9] placeholder-[#94A3B8]/50 outline-none focus:border-[#6366F1] focus:ring-1 focus:ring-[#6366F1]"
+                  className="w-full resize-none rounded-md border border-ink/10 bg-paper-dim px-4 py-3 text-sm text-ink placeholder-stone/50 outline-none focus:border-maroon focus:ring-1 focus:ring-maroon"
                 />
               </div>
             ))}
           </div>
 
           <button onClick={submit} disabled={!canSubmit || loading}
-            className={clsx("flex items-center justify-center gap-2 rounded-xl py-3.5 font-semibold transition-colors",
-              canSubmit && !loading ? "bg-[#6366F1] text-white hover:bg-[#4F46E5]" : "cursor-not-allowed bg-[#1E293B] text-[#94A3B8]")}>
+            className={clsx("flex items-center justify-center gap-2 rounded-md py-3.5 font-semibold transition-colors",
+              canSubmit && !loading ? "bg-maroon text-paper hover:bg-maroon-dark" : "cursor-not-allowed bg-ink/10 text-ink-soft")}>
             {loading ? <><Loader2 size={16} className="animate-spin" /> Grading…</> : "Submit Rebuttals"}
           </button>
+
+          {loading && <FeedbackSkeleton messages={GRADING_MESSAGES} rows={4} />}
         </div>
       )}
 
       {/* Feedback */}
       {phase === "feedback" && result && (
-        <div className="flex flex-col gap-4">
-          <div className="rounded-2xl border border-[#6366F1]/30 bg-[#6366F1]/10 p-5">
+        <ScoreReveal revealKey={result.overallScore} className="flex flex-col gap-4">
+          <div className="rounded-lg border border-maroon/30 bg-maroon/10 p-5">
             <div className="mb-2 flex items-center justify-between">
-              <span className="text-xs font-semibold uppercase tracking-wide text-[#6366F1]">Results</span>
-              <span className="text-2xl font-bold text-[#F1F5F9]">{result.overallScore}/10</span>
+              <span className="text-xs font-semibold uppercase tracking-wide text-maroon">Results</span>
+              <span className="text-2xl font-bold text-ink">{result.overallScore}/10</span>
             </div>
-            <p className="text-sm text-[#94A3B8]">{result.bestRebuttal}</p>
+            <p className="text-sm text-ink-soft">{result.bestRebuttal}</p>
           </div>
 
           {result.rebuttals.map((r, i) => (
-            <div key={i} className="glass-card rounded-2xl p-5">
+            <div key={i} className="glass-card rounded-lg p-5">
               <div className="mb-2 flex items-center justify-between">
-                <p className="text-xs font-semibold text-[#94A3B8]">Rebuttal {i + 1}</p>
-                <span className={clsx("text-sm font-bold", r.score >= 7 ? "text-emerald-400" : r.score >= 4 ? "text-amber-400" : "text-rose-400")}>
+                <p className="text-xs font-semibold text-ink-soft">Rebuttal {i + 1}</p>
+                <span className={clsx("text-sm font-bold", r.score >= 7 ? "text-forest" : r.score >= 4 ? "text-[#8a6b28]" : "text-maroon")}>
                   {r.score}/10
                 </span>
               </div>
-              <p className="mb-3 text-xs italic text-[#94A3B8]">&ldquo;{r.text}&rdquo;</p>
-              <p className="mb-3 text-sm text-[#94A3B8]">{r.feedback}</p>
-              <div className="rounded-xl border border-[#1E293B] bg-[#0A0F1E] p-3">
-                <p className="mb-1 text-xs font-semibold text-[#6366F1]">Stronger Version</p>
-                <p className="text-xs italic text-[#F1F5F9]">&ldquo;{r.improvedVersion}&rdquo;</p>
+              <p className="mb-3 text-xs italic text-ink-soft">&ldquo;{r.text}&rdquo;</p>
+              <p className="mb-3 text-sm text-ink-soft">{r.feedback}</p>
+              <div className="rounded-md border border-ink/10 bg-paper-dim p-3">
+                <p className="mb-1 text-xs font-semibold text-maroon">Stronger Version</p>
+                <p className="text-xs italic text-ink">&ldquo;{r.improvedVersion}&rdquo;</p>
               </div>
             </div>
           ))}
 
-          <div className="flex items-start gap-3 rounded-xl border border-[#1E293B] bg-[#111827] p-4">
-            <Zap size={14} className="mt-0.5 shrink-0 text-[#F59E0B]" />
+          <div className="flex items-start gap-3 rounded-md border border-ink/10 bg-paper-dim p-4">
+            <Zap size={14} className="mt-0.5 shrink-0 text-[#8a6b28]" />
             <div>
-              <p className="text-xs font-semibold text-[#F59E0B]">Next Drill</p>
-              <p className="text-sm text-[#F1F5F9]">{result.nextDrill}</p>
+              <p className="text-xs font-semibold text-[#8a6b28]">Next Drill</p>
+              <p className="text-sm text-ink">{result.nextDrill}</p>
             </div>
           </div>
 
-          <button onClick={reset} className="flex items-center justify-center gap-2 rounded-xl border border-[#1E293B] py-3 text-sm font-medium text-[#94A3B8] hover:border-[#6366F1]/50 hover:text-[#F1F5F9]">
+          <button onClick={reset} className="flex items-center justify-center gap-2 rounded-md border border-ink/10 py-3 text-sm font-medium text-ink-soft hover:border-maroon/50 hover:text-ink">
             <RefreshCw size={14} /> New Argument
           </button>
-        </div>
+        </ScoreReveal>
       )}
     </div>
   );

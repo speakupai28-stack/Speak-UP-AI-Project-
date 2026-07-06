@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { clsx } from "clsx";
 import { BookOpen, ChevronDown, ChevronUp, ArrowRight, Lightbulb, Globe2 } from "lucide-react";
 
 const LESSONS = [
@@ -71,40 +70,40 @@ export default function ModelUNIntro() {
     <div className="mx-auto max-w-4xl px-6 py-10">
       <div className="mb-8">
         <div className="mb-3 flex items-center gap-2">
-          <span className="rounded-full border border-teal-500/30 bg-teal-500/10 px-3 py-0.5 text-xs font-semibold text-teal-400">Section 1</span>
-          <span className="rounded-full border border-[#1E293B] px-3 py-0.5 text-xs text-[#94A3B8]">Introduction</span>
+          <span className="rounded-full border border-maroon/30 bg-maroon/10 px-3 py-0.5 text-xs font-semibold text-maroon">Section 1</span>
+          <span className="rounded-full border border-ink/10 px-3 py-0.5 text-xs text-ink-soft">Introduction</span>
         </div>
-        <h1 className="mb-2 text-3xl font-bold text-[#F1F5F9]">Introduction to Model UN</h1>
-        <p className="text-[#94A3B8]">Understand how committees work, your role as a delegate, and how to navigate the rules of procedure.</p>
+        <h1 className="mb-2 text-3xl font-bold text-ink">Introduction to Model UN</h1>
+        <p className="text-ink-soft">Understand how committees work, your role as a delegate, and how to navigate the rules of procedure.</p>
       </div>
 
       <div className="flex flex-col gap-3">
         {LESSONS.map((lesson, i) => {
           const open = openLesson === i;
           return (
-            <div key={lesson.id} className="glass-card overflow-hidden rounded-2xl">
+            <div key={lesson.id} className="glass-card overflow-hidden rounded-lg">
               <button onClick={() => setOpenLesson(open ? -1 : i)} className="flex w-full items-center gap-4 p-5 text-left">
-                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-teal-500">
-                  <BookOpen size={16} className="text-white" />
+                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-maroon/10">
+                  <BookOpen size={16} className="text-maroon" />
                 </div>
                 <div className="flex-1">
-                  <span className="text-xs font-semibold text-[#94A3B8]">Lesson {lesson.id}</span>
-                  <p className="font-semibold text-[#F1F5F9]">{lesson.title}</p>
+                  <span className="text-xs font-semibold text-ink-soft">Lesson {lesson.id}</span>
+                  <p className="font-semibold text-ink">{lesson.title}</p>
                 </div>
-                {open ? <ChevronUp size={16} className="shrink-0 text-[#94A3B8]" /> : <ChevronDown size={16} className="shrink-0 text-[#94A3B8]" />}
+                {open ? <ChevronUp size={16} className="shrink-0 text-ink-soft" /> : <ChevronDown size={16} className="shrink-0 text-ink-soft" />}
               </button>
               {open && (
-                <div className="border-t border-[#1E293B] px-5 pb-5 pt-4 space-y-4">
-                  <p className="text-sm leading-relaxed text-[#94A3B8]">{lesson.concept}</p>
+                <div className="border-t border-ink/10 px-5 pb-5 pt-4 space-y-4">
+                  <p className="text-sm leading-relaxed text-ink-soft">{lesson.concept}</p>
                   {"points" in lesson && (lesson as {points:string[]}).points.map((p, idx) => (
-                    <div key={idx} className="flex gap-2"><ArrowRight size={14} className="mt-0.5 shrink-0 text-teal-400" /><p className="text-sm text-[#94A3B8]">{p}</p></div>
+                    <div key={idx} className="flex gap-2"><ArrowRight size={14} className="mt-0.5 shrink-0 text-maroon" /><p className="text-sm text-ink-soft">{p}</p></div>
                   ))}
                   {"committees" in lesson && (
                     <div className="grid gap-2 sm:grid-cols-2">
                       {(lesson as {committees:{name:string;full:string;desc:string}[]}).committees.map((c) => (
-                        <div key={c.name} className="rounded-xl border border-[#1E293B] bg-[#0A0F1E] p-3">
-                          <p className="mb-0.5 text-sm font-bold text-teal-400">{c.name} <span className="font-normal text-[#F1F5F9]">— {c.full}</span></p>
-                          <p className="text-xs text-[#94A3B8]">{c.desc}</p>
+                        <div key={c.name} className="rounded-md border border-ink/10 bg-paper-dim p-3">
+                          <p className="mb-0.5 text-sm font-bold text-maroon">{c.name} <span className="font-normal text-ink">— {c.full}</span></p>
+                          <p className="text-xs text-ink-soft">{c.desc}</p>
                         </div>
                       ))}
                     </div>
@@ -112,9 +111,9 @@ export default function ModelUNIntro() {
                   {"motions" in lesson && (
                     <div className="flex flex-col gap-2">
                       {(lesson as {motions:{motion:string;desc:string}[]}).motions.map((m) => (
-                        <div key={m.motion} className="flex gap-3 rounded-xl border border-[#1E293B] bg-[#0A0F1E] p-3">
-                          <p className="text-sm font-semibold text-[#F1F5F9] w-48 shrink-0">{m.motion}</p>
-                          <p className="text-sm text-[#94A3B8]">{m.desc}</p>
+                        <div key={m.motion} className="flex gap-3 rounded-md border border-ink/10 bg-paper-dim p-3">
+                          <p className="text-sm font-semibold text-ink w-48 shrink-0">{m.motion}</p>
+                          <p className="text-sm text-ink-soft">{m.desc}</p>
                         </div>
                       ))}
                     </div>
@@ -122,31 +121,31 @@ export default function ModelUNIntro() {
                   {"structure" in lesson && (
                     <div className="flex flex-col gap-2">
                       {(lesson as {structure:{part:string;desc:string}[]}).structure.map((s) => (
-                        <div key={s.part} className="rounded-xl border border-[#1E293B] bg-[#0A0F1E] p-3">
-                          <p className="mb-0.5 text-sm font-semibold text-[#F1F5F9]">{s.part}</p>
-                          <p className="text-xs text-[#94A3B8]">{s.desc}</p>
+                        <div key={s.part} className="rounded-md border border-ink/10 bg-paper-dim p-3">
+                          <p className="mb-0.5 text-sm font-semibold text-ink">{s.part}</p>
+                          <p className="text-xs text-ink-soft">{s.desc}</p>
                         </div>
                       ))}
                       {"example" in lesson && (
-                        <div className="rounded-xl border border-teal-500/30 bg-teal-500/10 p-4">
-                          <p className="mb-1 text-xs font-semibold text-teal-400">Example</p>
-                          <pre className="text-xs leading-relaxed text-[#94A3B8] whitespace-pre-wrap">{(lesson as {example:string}).example}</pre>
+                        <div className="rounded-md border border-maroon/30 bg-maroon/10 p-4">
+                          <p className="mb-1 text-xs font-semibold text-maroon">Example</p>
+                          <pre className="text-xs leading-relaxed text-ink-soft whitespace-pre-wrap">{(lesson as {example:string}).example}</pre>
                         </div>
                       )}
                     </div>
                   )}
                   {"responsibilities" in lesson && (lesson as {responsibilities:string[]}).responsibilities.map((r, idx) => (
-                    <div key={idx} className="flex gap-2"><ArrowRight size={14} className="mt-0.5 shrink-0 text-teal-400" /><p className="text-sm text-[#94A3B8]">{r}</p></div>
+                    <div key={idx} className="flex gap-2"><ArrowRight size={14} className="mt-0.5 shrink-0 text-maroon" /><p className="text-sm text-ink-soft">{r}</p></div>
                   ))}
-                  <div className="rounded-xl border border-teal-500/30 bg-teal-500/10 px-4 py-3">
-                    <div className="flex gap-2"><Lightbulb size={14} className="mt-0.5 shrink-0 text-teal-400" /><p className="text-sm font-medium text-[#F1F5F9]">{lesson.takeaway}</p></div>
+                  <div className="rounded-md border border-maroon/30 bg-maroon/10 px-4 py-3">
+                    <div className="flex gap-2"><Lightbulb size={14} className="mt-0.5 shrink-0 text-maroon" /><p className="text-sm font-medium text-ink">{lesson.takeaway}</p></div>
                   </div>
                 </div>
               )}
             </div>
           );
         })}
-        <a href="/model-un/committee" className="mt-2 flex w-full items-center justify-center gap-2 rounded-xl bg-[#6366F1] py-3.5 font-semibold text-white hover:bg-[#4F46E5]">
+        <a href="/model-un/committee" className="mt-2 flex w-full items-center justify-center gap-2 rounded-md bg-maroon py-3.5 font-semibold text-paper hover:bg-maroon-dark">
           Continue to Section 2 — Committee Work <Globe2 size={16} />
         </a>
       </div>
