@@ -17,6 +17,11 @@ import {
   Loader2,
   Zap,
 } from "lucide-react";
+import { Button } from "@/components/ui/Button";
+import { Card } from "@/components/ui/Card";
+import { ProgressMeter } from "@/components/ui/ProgressMeter";
+import { LoadingSequence } from "@/components/ui/LoadingSequence";
+import { Reveal } from "@/components/motion/Reveal";
 import type { OnboardingProfile } from "@/lib/types";
 
 type Step = 1 | 2 | 3 | 4 | 5;
@@ -27,6 +32,13 @@ interface OnboardingData {
   focus: string[];
   goal: string;
 }
+
+const ANALYZING_MESSAGES = [
+  "Reading your goals…",
+  "Matching your coaching style…",
+  "Building your first challenge…",
+  "Personalizing your learning plan…",
+];
 
 const EXPERIENCE_OPTIONS = [
   {
@@ -55,21 +67,18 @@ const FOCUS_OPTIONS = [
     label: "Debate",
     description: "Policy, LD, PF, or parliamentary debate",
     icon: MessageSquare,
-    color: "from-indigo-500 to-purple-600",
   },
   {
     id: "model-un",
     label: "Model UN",
     description: "Committee simulations, position papers, speeches",
     icon: Globe2,
-    color: "from-blue-500 to-cyan-600",
   },
   {
     id: "public-speaking",
     label: "Public Speaking",
     description: "Presentations, speeches, and communication",
     icon: Mic2,
-    color: "from-amber-500 to-orange-600",
   },
 ];
 
@@ -100,6 +109,45 @@ const GOAL_OPTIONS = [
   },
 ];
 
+function OptionButton({
+  selected,
+  onClick,
+  icon: Icon,
+  label,
+  description,
+}: {
+  selected: boolean;
+  onClick: () => void;
+  icon: React.ComponentType<{ size?: number; className?: string }>;
+  label: string;
+  description: string;
+}) {
+  return (
+    <button
+      onClick={onClick}
+      className={clsx(
+        "flex items-center gap-4 rounded-md border p-4 text-left transition-all",
+        selected
+          ? "border-maroon bg-maroon/5 ring-1 ring-maroon"
+          : "border-ink/10 bg-paper-dim hover:border-maroon/40"
+      )}
+    >
+      <div
+        className={clsx(
+          "flex h-10 w-10 shrink-0 items-center justify-center rounded-md",
+          selected ? "bg-maroon text-paper" : "bg-ink/5 text-ink-soft"
+        )}
+      >
+        <Icon size={18} />
+      </div>
+      <div>
+        <p className="font-semibold text-ink">{label}</p>
+        <p className="text-sm text-ink-soft">{description}</p>
+      </div>
+      {selected && <CheckCircle2 size={18} className="ml-auto shrink-0 text-maroon" />}
+    </button>
+  );
+}
 
 export default function OnboardingPage() {
   const router = useRouter();
@@ -158,260 +206,224 @@ export default function OnboardingPage() {
 
   return (
     <div className="flex min-h-[calc(100vh-65px)] flex-col items-center justify-center px-4 py-16">
-      {step < 5 && (
+      {step < 5 && !analyzing && (
         <div className="mb-10 w-full max-w-lg">
-          <div className="mb-2 flex justify-between text-xs text-[#94A3B8]">
-            <span>Step {step} of {totalSteps}</span>
-            <span>{Math.round(progress)}% complete</span>
-          </div>
-          <div className="h-1.5 w-full overflow-hidden rounded-full bg-[#1E293B]">
-            <div
-              className="h-full rounded-full bg-[#6366F1] transition-all duration-500"
-              style={{ width: `${progress}%` }}
-            />
-          </div>
+          <ProgressMeter
+            value={progress}
+            label={`Step ${step} of ${totalSteps}`}
+            valueLabel={`${Math.round(progress)}% complete`}
+          />
         </div>
       )}
 
       <div className="w-full max-w-lg">
-        {/* Step 1 — Name */}
-        {step === 1 && (
-          <div className="animate-fade-in-up">
-            <h1 className="mb-2 text-3xl font-bold text-[#F1F5F9]">
-              Welcome to SpeakUP AI
-            </h1>
-            <p className="mb-8 text-[#94A3B8]">
-              Your personal coach for debate, Model UN, and public speaking.
-              Let&apos;s get you set up.
-            </p>
-            <label className="mb-2 block text-sm font-medium text-[#94A3B8]">
-              What should we call you?
-            </label>
-            <input
-              type="text"
-              placeholder="Your name or username"
-              value={data.name}
-              onChange={(e) => setData((d) => ({ ...d, name: e.target.value }))}
-              onKeyDown={(e) => e.key === "Enter" && canNext && setStep(2)}
-              className="w-full rounded-xl border border-[#1E293B] bg-[#111827] px-4 py-3 text-[#F1F5F9] placeholder-[#94A3B8] outline-none transition-colors focus:border-[#6366F1] focus:ring-1 focus:ring-[#6366F1]"
-              autoFocus
-            />
-          </div>
-        )}
-
-        {/* Step 2 — Experience */}
-        {step === 2 && (
-          <div className="animate-fade-in-up">
-            <h1 className="mb-2 text-3xl font-bold text-[#F1F5F9]">
-              What&apos;s your experience level?
-            </h1>
-            <p className="mb-8 text-[#94A3B8]">
-              We&apos;ll tailor your coaching and exercises to match where you are.
-            </p>
-            <div className="flex flex-col gap-3">
-              {EXPERIENCE_OPTIONS.map(({ id, label, description, icon: Icon }) => (
-                <button
-                  key={id}
-                  onClick={() => setData((d) => ({ ...d, experience: id }))}
-                  className={clsx(
-                    "flex items-center gap-4 rounded-xl border p-4 text-left transition-all",
-                    data.experience === id
-                      ? "border-[#6366F1] bg-[#6366F1]/10 ring-1 ring-[#6366F1]"
-                      : "border-[#1E293B] bg-[#111827] hover:border-[#6366F1]/50"
-                  )}
-                >
-                  <div className={clsx("flex h-10 w-10 shrink-0 items-center justify-center rounded-lg", data.experience === id ? "bg-[#6366F1]" : "bg-[#1a2236]")}>
-                    <Icon size={18} className="text-[#F1F5F9]" />
-                  </div>
-                  <div>
-                    <p className="font-semibold text-[#F1F5F9]">{label}</p>
-                    <p className="text-sm text-[#94A3B8]">{description}</p>
-                  </div>
-                  {data.experience === id && <CheckCircle2 size={18} className="ml-auto shrink-0 text-[#6366F1]" />}
-                </button>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* Step 3 — Focus Area */}
-        {step === 3 && (
-          <div className="animate-fade-in-up">
-            <h1 className="mb-2 text-3xl font-bold text-[#F1F5F9]">
-              What do you want to practice?
-            </h1>
-            <p className="mb-8 text-[#94A3B8]">
-              Select all that apply — you can always switch later.
-            </p>
-            <div className="flex flex-col gap-3">
-              {FOCUS_OPTIONS.map(({ id, label, description, icon: Icon, color }) => {
-                const selected = data.focus.includes(id);
-                return (
-                  <button
-                    key={id}
-                    onClick={() => toggleFocus(id)}
-                    className={clsx(
-                      "flex items-center gap-4 rounded-xl border p-4 text-left transition-all",
-                      selected
-                        ? "border-[#6366F1] bg-[#6366F1]/10 ring-1 ring-[#6366F1]"
-                        : "border-[#1E293B] bg-[#111827] hover:border-[#6366F1]/50"
-                    )}
-                  >
-                    <div className={clsx("flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-linear-to-br", color)}>
-                      <Icon size={18} className="text-white" />
-                    </div>
-                    <div>
-                      <p className="font-semibold text-[#F1F5F9]">{label}</p>
-                      <p className="text-sm text-[#94A3B8]">{description}</p>
-                    </div>
-                    {selected && <CheckCircle2 size={18} className="ml-auto shrink-0 text-[#6366F1]" />}
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-        )}
-
-        {/* Step 4 — Goal */}
-        {step === 4 && (
-          <div className="animate-fade-in-up">
-            <h1 className="mb-2 text-3xl font-bold text-[#F1F5F9]">
-              What&apos;s your main goal?
-            </h1>
-            <p className="mb-8 text-[#94A3B8]">
-              This helps us recommend the right exercises and pacing.
-            </p>
-            <div className="flex flex-col gap-3">
-              {GOAL_OPTIONS.map(({ id, label, description, icon: Icon }) => (
-                <button
-                  key={id}
-                  onClick={() => setData((d) => ({ ...d, goal: id }))}
-                  className={clsx(
-                    "flex items-center gap-4 rounded-xl border p-4 text-left transition-all",
-                    data.goal === id
-                      ? "border-[#6366F1] bg-[#6366F1]/10 ring-1 ring-[#6366F1]"
-                      : "border-[#1E293B] bg-[#111827] hover:border-[#6366F1]/50"
-                  )}
-                >
-                  <div className={clsx("flex h-10 w-10 shrink-0 items-center justify-center rounded-lg", data.goal === id ? "bg-[#6366F1]" : "bg-[#1a2236]")}>
-                    <Icon size={18} className="text-[#F1F5F9]" />
-                  </div>
-                  <div>
-                    <p className="font-semibold text-[#F1F5F9]">{label}</p>
-                    <p className="text-sm text-[#94A3B8]">{description}</p>
-                  </div>
-                  {data.goal === id && <CheckCircle2 size={18} className="ml-auto shrink-0 text-[#6366F1]" />}
-                </button>
-              ))}
-            </div>
-            {error && (
-              <p className="mt-4 text-sm text-rose-400">{error}</p>
-            )}
-          </div>
-        )}
-
-        {/* Step 5 — Personalized Completion */}
-        {step === 5 && profile && (
-          <div className="animate-fade-in-up">
-            {/* Header */}
-            <div className="mb-6 text-center">
-              <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-[#6366F1]/20">
-                <Sparkles size={32} className="text-[#6366F1]" />
-              </div>
-              <h1 className="mb-1 text-2xl font-bold text-[#F1F5F9]">
-                {profile.greeting}
+        {analyzing ? (
+          <Card padding="lg" className="flex flex-col items-center gap-5 text-center">
+            <Loader2 size={28} className="animate-spin text-maroon" />
+            <div>
+              <h1 className="font-display text-xl font-semibold text-ink">
+                Building your learning plan
               </h1>
-              <p className="text-sm font-medium text-gradient">{profile.tagline}</p>
+              <LoadingSequence
+                messages={ANALYZING_MESSAGES}
+                className="mt-2 text-sm text-ink-soft"
+              />
             </div>
-
-            {/* Coaching Style */}
-            <div className="mb-4 rounded-xl border border-[#1E293B] bg-[#111827] p-4">
-              <p className="mb-1 text-xs font-semibold uppercase tracking-wide text-[#94A3B8]">Your Coach</p>
-              <p className="text-sm text-[#F1F5F9]">{profile.coachingStyle}</p>
-            </div>
-
-            {/* Skills to build */}
-            <div className="mb-4 rounded-xl border border-[#1E293B] bg-[#111827] p-4">
-              <p className="mb-3 text-xs font-semibold uppercase tracking-wide text-[#94A3B8]">
-                Top Skills to Build
-              </p>
-              <div className="flex flex-col gap-2">
-                {profile.topFocusSkills.map((skill, i) => (
-                  <div key={i} className="flex items-center gap-2">
-                    <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[#6366F1]/20 text-xs font-bold text-[#6366F1]">
-                      {i + 1}
-                    </span>
-                    <span className="text-sm text-[#F1F5F9]">{skill}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* First Challenge */}
-            <div className="mb-4 rounded-xl border border-[#6366F1]/30 bg-[#6366F1]/10 p-4">
-              <div className="mb-1 flex items-center gap-2">
-                <Zap size={14} className="text-[#6366F1]" />
-                <p className="text-xs font-semibold uppercase tracking-wide text-[#6366F1]">
-                  First Challenge
+          </Card>
+        ) : (
+          <>
+            {/* Step 1 — Name */}
+            {step === 1 && (
+              <Reveal>
+                <h1 className="mb-2 font-display text-3xl font-semibold text-ink">
+                  Welcome to SpeakUP AI
+                </h1>
+                <p className="mb-8 text-ink-soft">
+                  Your personal coach for debate, Model UN, and public speaking.
+                  Let&apos;s get you set up.
                 </p>
-              </div>
-              <p className="mb-0.5 font-semibold text-[#F1F5F9]">{profile.firstChallengeTitle}</p>
-              <p className="text-sm text-[#94A3B8]">{profile.firstChallengeDescription}</p>
-            </div>
+                <label className="mb-2 block text-sm font-medium text-ink-soft">
+                  What should we call you?
+                </label>
+                <input
+                  type="text"
+                  placeholder="Your name or username"
+                  value={data.name}
+                  onChange={(e) => setData((d) => ({ ...d, name: e.target.value }))}
+                  onKeyDown={(e) => e.key === "Enter" && canNext && setStep(2)}
+                  className="w-full rounded-md border border-stone-light bg-paper px-4 py-3 text-ink placeholder:text-stone outline-none transition-colors focus:border-maroon focus:ring-1 focus:ring-maroon"
+                  autoFocus
+                />
+              </Reveal>
+            )}
 
-            {/* Insights */}
-            <div className="mb-6 flex flex-col gap-2">
-              {profile.personalizedInsights.map((insight, i) => (
-                <div key={i} className="flex gap-3 rounded-lg border border-[#1E293B] bg-[#111827] p-3">
-                  <CheckCircle2 size={16} className="mt-0.5 shrink-0 text-emerald-400" />
-                  <p className="text-sm text-[#94A3B8]">{insight}</p>
+            {/* Step 2 — Experience */}
+            {step === 2 && (
+              <Reveal>
+                <h1 className="mb-2 font-display text-3xl font-semibold text-ink">
+                  What&apos;s your experience level?
+                </h1>
+                <p className="mb-8 text-ink-soft">
+                  We&apos;ll tailor your coaching and exercises to match where you are.
+                </p>
+                <div className="flex flex-col gap-3">
+                  {EXPERIENCE_OPTIONS.map(({ id, label, description, icon }) => (
+                    <OptionButton
+                      key={id}
+                      selected={data.experience === id}
+                      onClick={() => setData((d) => ({ ...d, experience: id }))}
+                      icon={icon}
+                      label={label}
+                      description={description}
+                    />
+                  ))}
                 </div>
-              ))}
-            </div>
+              </Reveal>
+            )}
 
-            <button
-              onClick={() => router.push("/dashboard")}
-              className="w-full rounded-xl bg-[#6366F1] py-3 font-semibold text-white transition-colors hover:bg-[#4F46E5]"
-            >
-              Start My Journey
-            </button>
-          </div>
+            {/* Step 3 — Focus Area */}
+            {step === 3 && (
+              <Reveal>
+                <h1 className="mb-2 font-display text-3xl font-semibold text-ink">
+                  What do you want to practice?
+                </h1>
+                <p className="mb-8 text-ink-soft">
+                  Select all that apply — you can always switch later.
+                </p>
+                <div className="flex flex-col gap-3">
+                  {FOCUS_OPTIONS.map(({ id, label, description, icon }) => (
+                    <OptionButton
+                      key={id}
+                      selected={data.focus.includes(id)}
+                      onClick={() => toggleFocus(id)}
+                      icon={icon}
+                      label={label}
+                      description={description}
+                    />
+                  ))}
+                </div>
+              </Reveal>
+            )}
+
+            {/* Step 4 — Goal */}
+            {step === 4 && (
+              <Reveal>
+                <h1 className="mb-2 font-display text-3xl font-semibold text-ink">
+                  What&apos;s your main goal?
+                </h1>
+                <p className="mb-8 text-ink-soft">
+                  This helps us recommend the right exercises and pacing.
+                </p>
+                <div className="flex flex-col gap-3">
+                  {GOAL_OPTIONS.map(({ id, label, description, icon }) => (
+                    <OptionButton
+                      key={id}
+                      selected={data.goal === id}
+                      onClick={() => setData((d) => ({ ...d, goal: id }))}
+                      icon={icon}
+                      label={label}
+                      description={description}
+                    />
+                  ))}
+                </div>
+                {error && <p className="mt-4 text-sm text-maroon">{error}</p>}
+              </Reveal>
+            )}
+
+            {/* Step 5 — Personalized Completion */}
+            {step === 5 && profile && (
+              <Reveal>
+                <div className="mb-6 text-center">
+                  <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-maroon/10">
+                    <Sparkles size={32} className="text-maroon" />
+                  </div>
+                  <h1 className="mb-1 font-display text-2xl font-semibold text-ink">
+                    {profile.greeting}
+                  </h1>
+                  <p className="text-sm font-medium text-maroon">{profile.tagline}</p>
+                </div>
+
+                <Card padding="md" className="mb-4">
+                  <p className="mb-1 text-xs font-semibold uppercase tracking-wide text-stone">
+                    Your Coach
+                  </p>
+                  <p className="text-sm text-ink">{profile.coachingStyle}</p>
+                </Card>
+
+                <Card padding="md" className="mb-4">
+                  <p className="mb-3 text-xs font-semibold uppercase tracking-wide text-stone">
+                    Top Skills to Build
+                  </p>
+                  <div className="flex flex-col gap-2">
+                    {profile.topFocusSkills.map((skill, i) => (
+                      <div key={i} className="flex items-center gap-2">
+                        <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-maroon/10 text-xs font-bold text-maroon">
+                          {i + 1}
+                        </span>
+                        <span className="text-sm text-ink">{skill}</span>
+                      </div>
+                    ))}
+                  </div>
+                </Card>
+
+                <div className="mb-4 rounded-md border border-maroon/20 bg-maroon/5 p-4">
+                  <div className="mb-1 flex items-center gap-2">
+                    <Zap size={14} className="text-maroon" />
+                    <p className="text-xs font-semibold uppercase tracking-wide text-maroon">
+                      First Challenge
+                    </p>
+                  </div>
+                  <p className="mb-0.5 font-semibold text-ink">
+                    {profile.firstChallengeTitle}
+                  </p>
+                  <p className="text-sm text-ink-soft">
+                    {profile.firstChallengeDescription}
+                  </p>
+                </div>
+
+                <div className="mb-6 flex flex-col gap-2">
+                  {profile.personalizedInsights.map((insight, i) => (
+                    <div
+                      key={i}
+                      className="flex gap-3 rounded-md border border-ink/10 bg-paper-dim p-3"
+                    >
+                      <CheckCircle2 size={16} className="mt-0.5 shrink-0 text-forest" />
+                      <p className="text-sm text-ink-soft">{insight}</p>
+                    </div>
+                  ))}
+                </div>
+
+                <Button onClick={() => router.push("/dashboard")} size="lg" className="w-full">
+                  Start My Journey
+                </Button>
+              </Reveal>
+            )}
+          </>
         )}
 
         {/* Navigation */}
-        {step < 5 && (
+        {step < 5 && !analyzing && (
           <div className="mt-8 flex gap-3">
             {step > 1 && (
-              <button
+              <Button
+                variant="secondary"
                 onClick={() => setStep((s) => (s - 1) as Step)}
-                disabled={analyzing}
-                className="flex items-center gap-2 rounded-xl border border-[#1E293B] px-5 py-3 text-sm font-medium text-[#94A3B8] transition-colors hover:border-[#6366F1]/50 hover:text-[#F1F5F9] disabled:opacity-50"
               >
                 <ChevronLeft size={16} />
                 Back
-              </button>
+              </Button>
             )}
-            <button
+            <Button
               onClick={step === 4 ? finish : () => setStep((s) => (s + 1) as Step)}
-              disabled={!canNext || analyzing}
-              className={clsx(
-                "flex flex-1 items-center justify-center gap-2 rounded-xl py-3 text-sm font-semibold transition-colors",
-                canNext && !analyzing
-                  ? "bg-[#6366F1] text-white hover:bg-[#4F46E5]"
-                  : "cursor-not-allowed bg-[#1E293B] text-[#94A3B8]"
-              )}
+              disabled={!canNext}
+              className="flex-1"
             >
-              {analyzing ? (
-                <>
-                  <Loader2 size={16} className="animate-spin" />
-                  Analyzing your profile…
-                </>
-              ) : step === 4 ? (
+              {step === 4 ? (
                 <>Finish <ChevronRight size={16} /></>
               ) : (
                 <>Continue <ChevronRight size={16} /></>
               )}
-            </button>
+            </Button>
           </div>
         )}
       </div>
