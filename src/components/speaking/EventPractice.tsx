@@ -170,10 +170,10 @@ export default function EventPractice({ level: propLevel }: EventPracticeProps) 
       <form onSubmit={handleSubmit} className="flex flex-col gap-4">
         <div>
           <div className="mb-2 flex justify-between">
-            <label className="text-sm font-medium text-ink-soft">Your Speech</label>
+            <label htmlFor="ep-speech" className="text-sm font-medium text-ink-soft">Your Speech</label>
             <span className="text-xs text-stone/60">{speechText.length} chars</span>
           </div>
-          <textarea rows={10} placeholder={`Write your ${selectedEvent.id.toLowerCase()} here. Keep in mind the format: ${selectedEvent.duration}, focused on ${selectedEvent.focus}.`}
+          <textarea id="ep-speech" rows={10} placeholder={`Write your ${selectedEvent.id.toLowerCase()} here. Keep in mind the format: ${selectedEvent.duration}, focused on ${selectedEvent.focus}.`}
             value={speechText} onChange={(e) => setSpeechText(e.target.value)}
             className="w-full resize-y rounded-md border border-ink/10 bg-paper-dim px-4 py-3 text-sm text-ink placeholder-stone/50 outline-none focus:border-gold/50 focus:ring-1 focus:ring-gold/50" />
         </div>

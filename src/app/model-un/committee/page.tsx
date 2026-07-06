@@ -210,19 +210,19 @@ export default function ModelUNCommittee() {
           </div>
           <div className="grid gap-4 sm:grid-cols-2">
             <div>
-              <label className="mb-2 block text-sm font-medium text-ink-soft">Your Country</label>
-              <input type="text" placeholder="e.g. France, Brazil..." value={country} onChange={(e) => setCountry(e.target.value)}
+              <label htmlFor="mun-country" className="mb-2 block text-sm font-medium text-ink-soft">Your Country</label>
+              <input id="mun-country" type="text" placeholder="e.g. France, Brazil..." value={country} onChange={(e) => setCountry(e.target.value)}
                 className="w-full rounded-md border border-ink/10 bg-paper-dim px-4 py-3 text-sm text-ink placeholder-stone/60 outline-none focus:border-maroon focus:ring-1 focus:ring-maroon" />
             </div>
             <div>
-              <label className="mb-2 block text-sm font-medium text-ink-soft">Topic</label>
-              <input type="text" placeholder="e.g. Climate change, Sudan crisis..." value={topic} onChange={(e) => setTopic(e.target.value)}
+              <label htmlFor="mun-topic" className="mb-2 block text-sm font-medium text-ink-soft">Topic</label>
+              <input id="mun-topic" type="text" placeholder="e.g. Climate change, Sudan crisis..." value={topic} onChange={(e) => setTopic(e.target.value)}
                 className="w-full rounded-md border border-ink/10 bg-paper-dim px-4 py-3 text-sm text-ink placeholder-stone/60 outline-none focus:border-maroon focus:ring-1 focus:ring-maroon" />
             </div>
           </div>
           <div>
-            <label className="mb-2 block text-sm font-medium text-ink-soft">Your Speech</label>
-            <textarea rows={8} placeholder="Write your MUN speech here..." value={speechText} onChange={(e) => setSpeechText(e.target.value)}
+            <label htmlFor="mun-speech" className="mb-2 block text-sm font-medium text-ink-soft">Your Speech</label>
+            <textarea id="mun-speech" rows={8} placeholder="Write your MUN speech here..." value={speechText} onChange={(e) => setSpeechText(e.target.value)}
               className="w-full resize-y rounded-md border border-ink/10 bg-paper-dim px-4 py-3 text-sm text-ink placeholder-stone/50 outline-none focus:border-maroon focus:ring-1 focus:ring-maroon" />
           </div>
           {error && <p className="text-sm text-maroon">{error}</p>}

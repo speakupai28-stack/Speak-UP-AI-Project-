@@ -117,10 +117,10 @@ export default function SpeechFeedback({ level: propLevel }: SpeechFeedbackProps
 
           <div>
             <div className="mb-2 flex items-center justify-between">
-              <label className="text-sm font-medium text-ink-soft">Your Speech</label>
+              <label htmlFor="sf-speech" className="text-sm font-medium text-ink-soft">Your Speech</label>
               <span className="text-xs text-stone/60">{speechText.length} chars</span>
             </div>
-            <textarea rows={10} placeholder="Write your full speech here…"
+            <textarea id="sf-speech" rows={10} placeholder="Write your full speech here…"
               value={speechText} onChange={(e) => setSpeechText(e.target.value)}
               className="w-full resize-y rounded-md border border-ink/10 bg-paper-dim px-4 py-3 text-sm text-ink placeholder-stone/50 outline-none focus:border-maroon focus:ring-1 focus:ring-maroon" />
           </div>

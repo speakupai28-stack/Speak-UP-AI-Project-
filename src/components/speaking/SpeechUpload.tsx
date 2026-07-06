@@ -92,16 +92,16 @@ export default function SpeechUpload({ level: propLevel }: SpeechUploadProps) {
                 </button>
               ))}
             </div>
-            <input type="text" placeholder="Or type your own topic…" value={customTopic} onChange={(e) => setCustomTopic(e.target.value)}
+            <input type="text" aria-label="Custom speech topic" placeholder="Or type your own topic…" value={customTopic} onChange={(e) => setCustomTopic(e.target.value)}
               className="w-full rounded-md border border-ink/10 bg-paper-dim px-4 py-3 text-sm text-ink placeholder-stone/60 outline-none focus:border-maroon/50 focus:ring-1 focus:ring-maroon/50" />
           </div>
 
           <div>
             <div className="mb-2 flex justify-between">
-              <label className="text-sm font-medium text-ink-soft">Your Speech</label>
+              <label htmlFor="su-speech" className="text-sm font-medium text-ink-soft">Your Speech</label>
               <span className="text-xs text-stone/60">{speechText.length} chars</span>
             </div>
-            <textarea rows={10} placeholder="Write or paste your full speech here. The more detail you give, the more specific the feedback will be."
+            <textarea id="su-speech" rows={10} placeholder="Write or paste your full speech here. The more detail you give, the more specific the feedback will be."
               value={speechText} onChange={(e) => setSpeechText(e.target.value)}
               className="w-full resize-y rounded-md border border-ink/10 bg-paper-dim px-4 py-3 text-sm text-ink placeholder-stone/50 outline-none focus:border-maroon/50 focus:ring-1 focus:ring-maroon/50" />
           </div>

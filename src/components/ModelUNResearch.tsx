@@ -145,10 +145,11 @@ export default function ModelUNResearch() {
         <div className="grid gap-5 sm:grid-cols-2">
           {/* Country */}
           <div>
-            <label className="mb-1.5 flex items-center gap-2 text-sm font-medium text-ink-soft">
+            <label htmlFor="mun-research-country" className="mb-1.5 flex items-center gap-2 text-sm font-medium text-ink-soft">
               <MapPin size={14} /> Country You&apos;re Representing
             </label>
             <input
+              id="mun-research-country"
               type="text"
               placeholder="e.g. Brazil, India, Germany…"
               value={form.country}
@@ -159,10 +160,11 @@ export default function ModelUNResearch() {
 
           {/* Committee */}
           <div>
-            <label className="mb-1.5 flex items-center gap-2 text-sm font-medium text-ink-soft">
+            <label htmlFor="mun-research-committee" className="mb-1.5 flex items-center gap-2 text-sm font-medium text-ink-soft">
               <Landmark size={14} /> Committee
             </label>
             <input
+              id="mun-research-committee"
               type="text"
               placeholder="e.g. UNSC, UNGA, WHO, UNHRC…"
               value={form.committee}
@@ -174,10 +176,11 @@ export default function ModelUNResearch() {
 
         {/* Topic */}
         <div>
-          <label className="mb-1.5 flex items-center gap-2 text-sm font-medium text-ink-soft">
+          <label htmlFor="mun-research-topic" className="mb-1.5 flex items-center gap-2 text-sm font-medium text-ink-soft">
             <Globe2 size={14} /> Topic / Agenda Item
           </label>
           <input
+            id="mun-research-topic"
             type="text"
             placeholder="e.g. The humanitarian crisis in Sudan, Nuclear non-proliferation…"
             value={form.topic}
@@ -189,11 +192,12 @@ export default function ModelUNResearch() {
         <div className="grid gap-5 sm:grid-cols-2">
           {/* Bloc */}
           <div>
-            <label className="mb-1.5 flex items-center gap-2 text-sm font-medium text-ink-soft">
+            <label htmlFor="mun-research-bloc" className="mb-1.5 flex items-center gap-2 text-sm font-medium text-ink-soft">
               <Users size={14} /> Bloc / Alliance{" "}
               <span className="text-xs text-stone/60">(optional)</span>
             </label>
             <input
+              id="mun-research-bloc"
               type="text"
               placeholder="e.g. G77, EU, African Union, NATO…"
               value={form.bloc}
@@ -204,11 +208,12 @@ export default function ModelUNResearch() {
 
           {/* Speaker Position */}
           <div>
-            <label className="mb-1.5 flex items-center gap-2 text-sm font-medium text-ink-soft">
+            <label htmlFor="mun-research-position" className="mb-1.5 flex items-center gap-2 text-sm font-medium text-ink-soft">
               <FileText size={14} /> Speaker Position{" "}
               <span className="text-xs text-stone/60">(optional)</span>
             </label>
             <select
+              id="mun-research-position"
               value={form.speakerPosition}
               onChange={(e) => set("speakerPosition", e.target.value)}
               className="w-full rounded-md border border-ink/10 bg-paper-dim px-4 py-3 text-ink outline-none transition-colors focus:border-maroon focus:ring-1 focus:ring-maroon"
@@ -223,7 +228,7 @@ export default function ModelUNResearch() {
 
         {/* Historical Stance — big textarea */}
         <div>
-          <label className="mb-1.5 flex items-center gap-2 text-sm font-medium text-ink-soft">
+          <label htmlFor="mun-research-stance" className="mb-1.5 flex items-center gap-2 text-sm font-medium text-ink-soft">
             <AlignLeft size={14} /> Your Country&apos;s Historical Stance on This Topic
           </label>
           <p className="mb-2 text-xs text-stone/70">
@@ -232,6 +237,7 @@ export default function ModelUNResearch() {
             personalized your research guide will be.
           </p>
           <textarea
+            id="mun-research-stance"
             rows={8}
             placeholder={`Example:\n"Brazil has historically supported multilateral climate agreements and signed the Paris Agreement. They've pushed for technology transfer to developing nations and opposed binding emissions caps that would limit economic growth. Brazil's Amazon deforestation policies have been a point of tension with the EU. In COP27, Brazil shifted its stance under the new government..."`}
             value={form.historicalStance}

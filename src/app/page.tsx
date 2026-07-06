@@ -294,7 +294,7 @@ export default function HomePage() {
           </div>
         </Reveal>
 
-        <StaggerGroup className="grid gap-5 lg:grid-cols-4">
+        <StaggerGroup className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
           {PRICING.map((tier) => (
             <StaggerItem key={tier.name}>
               <PricingCard {...tier} />

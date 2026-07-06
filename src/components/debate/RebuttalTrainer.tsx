@@ -168,10 +168,11 @@ export default function RebuttalTrainer({ level: propLevel }: RebuttalTrainerPro
           <div className="flex flex-col gap-3">
             {[0, 1, 2].map((i) => (
               <div key={i}>
-                <label className="mb-1.5 block text-xs font-semibold text-ink-soft">
+                <label htmlFor={`rebuttal-${i}`} className="mb-1.5 block text-xs font-semibold text-ink-soft">
                   Rebuttal {i + 1} {i === 0 ? "(required)" : "(optional)"}
                 </label>
                 <textarea
+                  id={`rebuttal-${i}`}
                   rows={3}
                   placeholder={
                     i === 0 ? "Your strongest rebuttal..."

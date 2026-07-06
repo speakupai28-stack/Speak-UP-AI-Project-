@@ -564,6 +564,7 @@ export default function Level1() {
               </div>
               <input
                 type="text"
+                aria-label="Custom debate topic"
                 placeholder="Or type your own topic…"
                 value={customTopic}
                 onChange={(e) => setCustomTopic(e.target.value)}
@@ -596,7 +597,7 @@ export default function Level1() {
             {/* Speech Text */}
             <div>
               <div className="mb-2 flex items-center justify-between">
-                <label className="text-sm font-medium text-ink-soft">Write your speech</label>
+                <label htmlFor="l1-speech" className="text-sm font-medium text-ink-soft">Write your speech</label>
                 <span className="text-xs text-stone/60">Aim for 2 minutes (~250–300 words)</span>
               </div>
               <div className="mb-2 rounded-md border border-ink/10 bg-paper-dim/50 px-4 py-3">
@@ -605,6 +606,7 @@ export default function Level1() {
                 </p>
               </div>
               <textarea
+                id="l1-speech"
                 rows={10}
                 placeholder={`Write your ${speechType.toLowerCase()} here. Include at least 2 complete CWI arguments.\n\nExample start: "I stand in affirmation of the resolution that ${finalTopic}. My first argument is..."`}
                 value={speechText}

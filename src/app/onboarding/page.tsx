@@ -242,10 +242,11 @@ export default function OnboardingPage() {
                   Your personal coach for debate, Model UN, and public speaking.
                   Let&apos;s get you set up.
                 </p>
-                <label className="mb-2 block text-sm font-medium text-ink-soft">
+                <label htmlFor="onboarding-name" className="mb-2 block text-sm font-medium text-ink-soft">
                   What should we call you?
                 </label>
                 <input
+                  id="onboarding-name"
                   type="text"
                   placeholder="Your name or username"
                   value={data.name}

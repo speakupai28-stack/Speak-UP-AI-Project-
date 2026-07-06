@@ -306,8 +306,8 @@ export default function Level3() {
               </div>
             </div>
             <div>
-              <label className="mb-2 block text-sm font-medium text-ink-soft">Your Speech</label>
-              <textarea rows={10} placeholder="Write your final speech. Collapse to your 2 best arguments. Weigh impacts explicitly. Make it count." value={speechText} onChange={(e) => setSpeechText(e.target.value)}
+              <label htmlFor="l3-speech" className="mb-2 block text-sm font-medium text-ink-soft">Your Speech</label>
+              <textarea id="l3-speech" rows={10} placeholder="Write your final speech. Collapse to your 2 best arguments. Weigh impacts explicitly. Make it count." value={speechText} onChange={(e) => setSpeechText(e.target.value)}
                 className="w-full resize-y rounded-md border border-ink/10 bg-paper-dim px-4 py-3 text-sm text-ink placeholder-stone/50 outline-none focus:border-maroon focus:ring-1 focus:ring-maroon" />
             </div>
             {error && <p className="text-sm text-maroon">{error}</p>}

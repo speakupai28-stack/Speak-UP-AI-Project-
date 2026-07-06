@@ -54,7 +54,7 @@ export function Tabs({ tabs, active, onChange, className }: TabsProps) {
             onClick={() => onChange(id)}
             onKeyDown={(e) => handleKeyDown(e, index)}
             className={clsx(
-              "flex shrink-0 items-center gap-1.5 whitespace-nowrap rounded-[calc(var(--radius-md)-2px)] px-3.5 py-2 text-sm font-medium transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-maroon",
+              "flex min-h-11 shrink-0 items-center gap-1.5 whitespace-nowrap rounded-[calc(var(--radius-md)-2px)] px-3.5 py-2 text-sm font-medium transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-maroon",
               selected
                 ? "bg-ink text-paper"
                 : "text-ink-soft hover:bg-ink/5 hover:text-ink"
