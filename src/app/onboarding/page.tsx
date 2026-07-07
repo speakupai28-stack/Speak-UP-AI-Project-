@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { signIn } from "next-auth/react";
 import { clsx } from "clsx";
 import {
   ChevronRight,
@@ -161,6 +162,10 @@ export default function OnboardingPage() {
   const [analyzing, setAnalyzing] = useState(false);
   const [profile, setProfile] = useState<OnboardingProfile | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [creatingAccount, setCreatingAccount] = useState(false);
+  const [accountError, setAccountError] = useState<string | null>(null);
 
   const totalSteps = 4;
   const progress = ((step - 1) / totalSteps) * 100;
@@ -186,15 +191,54 @@ export default function OnboardingPage() {
       if (!res.ok) throw new Error("Failed to generate profile");
       const aiProfile: OnboardingProfile = await res.json();
       setProfile(aiProfile);
-      localStorage.setItem(
-        "speakup_user",
-        JSON.stringify({ ...data, profile: aiProfile })
-      );
       setStep(5);
     } catch {
       setError("Something went wrong. Please try again.");
     } finally {
       setAnalyzing(false);
+    }
+  }
+
+  async function createAccount() {
+    if (!profile) return;
+    setCreatingAccount(true);
+    setAccountError(null);
+    try {
+      const res = await fetch("/api/auth/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          email,
+          password,
+          name: data.name,
+          experience: data.experience,
+          focus: data.focus,
+          goal: data.goal,
+          profile,
+        }),
+      });
+      if (!res.ok) {
+        const body = await res.json().catch(() => ({}));
+        setAccountError(body.error ?? "Something went wrong. Please try again.");
+        return;
+      }
+
+      const signInResult = await signIn("credentials", {
+        email,
+        password,
+        redirect: false,
+      });
+      if (signInResult?.error) {
+        setAccountError("Account created, but logging you in failed. Try logging in.");
+        return;
+      }
+
+      router.push("/dashboard");
+      router.refresh();
+    } catch {
+      setAccountError("Something went wrong. Please try again.");
+    } finally {
+      setCreatingAccount(false);
     }
   }
 
@@ -394,7 +438,50 @@ export default function OnboardingPage() {
                   ))}
                 </div>
 
-                <Button onClick={() => router.push("/dashboard")} size="lg" className="w-full">
+                <Card padding="md" className="mb-6">
+                  <p className="mb-3 text-xs font-semibold uppercase tracking-wide text-stone">
+                    Save your progress — create your account
+                  </p>
+                  <div className="flex flex-col gap-3">
+                    <div>
+                      <label htmlFor="onboarding-email" className="mb-1.5 block text-sm font-medium text-ink-soft">
+                        Email
+                      </label>
+                      <input
+                        id="onboarding-email"
+                        type="email"
+                        autoComplete="email"
+                        placeholder="you@example.com"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        className="w-full rounded-md border border-stone-light bg-paper px-4 py-3 text-ink placeholder:text-stone outline-none transition-colors focus:border-maroon focus:ring-1 focus:ring-maroon"
+                      />
+                    </div>
+                    <div>
+                      <label htmlFor="onboarding-password" className="mb-1.5 block text-sm font-medium text-ink-soft">
+                        Password
+                      </label>
+                      <input
+                        id="onboarding-password"
+                        type="password"
+                        autoComplete="new-password"
+                        placeholder="At least 8 characters"
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        className="w-full rounded-md border border-stone-light bg-paper px-4 py-3 text-ink placeholder:text-stone outline-none transition-colors focus:border-maroon focus:ring-1 focus:ring-maroon"
+                      />
+                    </div>
+                  </div>
+                  {accountError && <p className="mt-3 text-sm text-maroon">{accountError}</p>}
+                </Card>
+
+                <Button
+                  onClick={createAccount}
+                  loading={creatingAccount}
+                  disabled={!email || password.length < 8}
+                  size="lg"
+                  className="w-full"
+                >
                   Start My Journey
                 </Button>
               </Reveal>

@@ -4,9 +4,10 @@ import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { clsx } from "clsx";
-import { Menu, X } from "lucide-react";
+import { Menu, X, LogOut } from "lucide-react";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
-import { ButtonLink } from "@/components/ui";
+import { useSession, signOut } from "next-auth/react";
+import { ButtonLink, Button } from "@/components/ui";
 
 const navLinks = [
   { href: "/debate", label: "Debate" },
@@ -20,6 +21,8 @@ export default function Navbar() {
   const pathname = usePathname();
   const [menuOpen, setMenuOpen] = useState(false);
   const reduceMotion = useReducedMotion();
+  const { data: session, status } = useSession();
+  const authed = status === "authenticated";
 
   return (
     <nav className="sticky top-0 z-50 border-b border-ink/10 bg-paper/90 backdrop-blur-md">
@@ -54,10 +57,30 @@ export default function Navbar() {
         </div>
 
         <div className="flex items-center gap-3">
-          <ButtonLink href="/onboarding" size="sm">
-            <span className="hidden sm:inline">Get Started</span>
-            <span className="sm:hidden">Start</span>
-          </ButtonLink>
+          {authed ? (
+            <>
+              <span className="hidden text-sm text-ink-soft sm:inline">
+                {session.user?.name?.split(" ")[0] ?? "Account"}
+              </span>
+              <Button variant="secondary" size="sm" onClick={() => signOut({ callbackUrl: "/" })}>
+                <LogOut size={14} />
+                <span className="hidden sm:inline">Log out</span>
+              </Button>
+            </>
+          ) : (
+            <>
+              <Link
+                href="/login"
+                className="hidden text-sm font-medium text-ink-soft transition-colors hover:text-ink sm:block"
+              >
+                Log in
+              </Link>
+              <ButtonLink href="/onboarding" size="sm">
+                <span className="hidden sm:inline">Get Started</span>
+                <span className="sm:hidden">Start</span>
+              </ButtonLink>
+            </>
+          )}
           <button
             type="button"
             onClick={() => setMenuOpen((o) => !o)}
@@ -97,6 +120,26 @@ export default function Navbar() {
                   {label}
                 </Link>
               ))}
+              {!authed && (
+                <Link
+                  href="/login"
+                  onClick={() => setMenuOpen(false)}
+                  className="rounded-md px-3 py-3 text-base font-medium text-ink-soft transition-colors hover:bg-ink/5 hover:text-ink"
+                >
+                  Log in
+                </Link>
+              )}
+              {authed && (
+                <button
+                  onClick={() => {
+                    setMenuOpen(false);
+                    signOut({ callbackUrl: "/" });
+                  }}
+                  className="flex items-center gap-2 rounded-md px-3 py-3 text-left text-base font-medium text-ink-soft transition-colors hover:bg-ink/5 hover:text-ink"
+                >
+                  <LogOut size={16} /> Log out
+                </button>
+              )}
             </div>
           </motion.div>
         )}

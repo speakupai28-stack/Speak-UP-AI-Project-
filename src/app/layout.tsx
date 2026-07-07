@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Fraunces, Public_Sans } from "next/font/google";
 import "./globals.css";
 import Navbar from "@/components/Navbar";
+import { Providers } from "@/components/providers/Providers";
 
 const fraunces = Fraunces({
   variable: "--font-fraunces",
@@ -33,10 +34,12 @@ export default function RootLayout({
       className={`${fraunces.variable} ${publicSans.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col bg-paper text-ink">
-        <Navbar />
-        <main id="main-content" className="flex-1">
-          {children}
-        </main>
+        <Providers>
+          <Navbar />
+          <main id="main-content" className="flex-1">
+            {children}
+          </main>
+        </Providers>
       </body>
     </html>
   );
