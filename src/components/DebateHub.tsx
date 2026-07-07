@@ -12,7 +12,7 @@ import {
 } from "lucide-react";
 import { Card } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
-import { useClientValue } from "@/lib/useClientValue";
+import { useMe } from "@/components/providers/ProgressProvider";
 import { ButtonLink } from "@/components/ui/Button";
 
 const LEVELS = [
@@ -81,18 +81,9 @@ const LEVELS = [
   },
 ];
 
-function readExperience(): string | null {
-  if (typeof window === "undefined") return null;
-  try {
-    const raw = localStorage.getItem("speakup_user");
-    return raw ? (JSON.parse(raw).experience ?? null) : null;
-  } catch {
-    return null;
-  }
-}
-
 export default function DebateHub() {
-  const experience = useClientValue(readExperience, null);
+  const { me } = useMe();
+  const experience = me?.experience ?? null;
 
   const recommendedLevel =
     experience === "advanced" ? "level-3"

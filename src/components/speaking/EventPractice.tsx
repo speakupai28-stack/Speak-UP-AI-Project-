@@ -5,7 +5,7 @@ import { clsx } from "clsx";
 import { Loader2, Send, Star, ArrowRight, RefreshCw, ChevronDown, ChevronUp } from "lucide-react";
 import { FeedbackSkeleton } from "@/components/ui/FeedbackSkeleton";
 import { ScoreReveal } from "@/components/motion/ScoreReveal";
-import { recordSpeakingSession, getSpeakingProgress } from "@/lib/speakingProgress";
+import { useSpeakingProgress } from "@/components/providers/ProgressProvider";
 import type { EventFeedback } from "@/lib/types";
 
 const FEEDBACK_MESSAGES = [
@@ -31,7 +31,8 @@ const EVENTS = [
 interface EventPracticeProps { level?: number; }
 
 export default function EventPractice({ level: propLevel }: EventPracticeProps) {
-  const level = propLevel ?? getSpeakingProgress().level;
+  const { recordSession } = useSpeakingProgress();
+  const level = propLevel ?? 1;
   const [selectedEvent, setSelectedEvent] = useState<typeof EVENTS[0] | null>(null);
   const [speechText, setSpeechText] = useState("");
   const [loading, setLoading] = useState(false);
@@ -52,7 +53,7 @@ export default function EventPractice({ level: propLevel }: EventPracticeProps) 
       if (!res.ok) throw new Error();
       const data: EventFeedback = await res.json();
       setFeedback(data);
-      recordSpeakingSession({ type: "event", level: level as 1|2|3, topic: selectedEvent.id, score: data.overallScore, weaknesses: [data.weakness] });
+      await recordSession({ type: "event", level: level as 1|2|3, topic: selectedEvent.id, score: data.overallScore, weaknesses: [data.weakness] });
       setTimeout(() => document.getElementById("ep-feedback")?.scrollIntoView({ behavior: "smooth" }), 100);
     } catch { setError("Something went wrong. Try again."); }
     finally { setLoading(false); }

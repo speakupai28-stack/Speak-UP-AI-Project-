@@ -13,6 +13,7 @@ interface BaseProgress {
   level: number;
   xp: number;
   weaknesses: Record<string, number>;
+  sessions: unknown[];
 }
 
 interface BaseDecision {
@@ -30,13 +31,14 @@ interface ProgressTrackerProps<P extends BaseProgress> {
   maxLevel: number;
   maxLevelMessage: string;
   evaluateEndpoint: string;
-  getProgress: () => P;
-  shouldEvaluate: (p: P) => boolean;
-  applyVerdict: (verdict: Verdict, p: P) => P;
+  progress: P | null;
   getTopWeaknesses: (p: P) => { label: string; count: number }[];
-  onLevelChange?: (level: number) => void;
+  onAcceptVerdict: (verdict: Verdict) => Promise<unknown>;
 }
 
+// Progress now lives in the ProgressProvider context (fetched from the
+// database), so this component is purely presentational plus the
+// level-up evaluation flow — no more localStorage polling.
 export function ProgressTracker<P extends BaseProgress, D extends BaseDecision = BaseDecision>({
   icon: Icon,
   eyebrow,
@@ -44,21 +46,18 @@ export function ProgressTracker<P extends BaseProgress, D extends BaseDecision =
   maxLevel,
   maxLevelMessage,
   evaluateEndpoint,
-  getProgress,
-  shouldEvaluate,
-  applyVerdict,
+  progress,
   getTopWeaknesses,
-  onLevelChange,
+  onAcceptVerdict,
 }: ProgressTrackerProps<P>) {
-  const [progress, setProgress] = useState<P | null>(null);
   const [evaluating, setEvaluating] = useState(false);
+  const [accepting, setAccepting] = useState(false);
   const [decision, setDecision] = useState<D | null>(null);
   const [showDecision, setShowDecision] = useState(false);
-  const evaluatingRef = useRef(false);
+  const evaluatedRef = useRef(false);
 
   const runEvaluation = useCallback(
     async (p: P) => {
-      evaluatingRef.current = true;
       setEvaluating(true);
       try {
         const res = await fetch(evaluateEndpoint, {
@@ -66,7 +65,7 @@ export function ProgressTracker<P extends BaseProgress, D extends BaseDecision =
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             currentLevel: p.level,
-            sessions: (p as unknown as { sessions: unknown }).sessions,
+            sessions: p.sessions,
             weaknesses: p.weaknesses,
           }),
         });
@@ -75,41 +74,33 @@ export function ProgressTracker<P extends BaseProgress, D extends BaseDecision =
         setDecision(dec);
         setShowDecision(true);
       } catch {
-        // silently retry on the next poll tick
+        evaluatedRef.current = false;
       } finally {
-        evaluatingRef.current = false;
         setEvaluating(false);
       }
     },
     [evaluateEndpoint]
   );
 
-  // localStorage is client-only; reading it in a lazy initializer would
-  // desync the server-rendered HTML from the client's first paint.
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setProgress(getProgress());
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+    if (!progress) return;
+    if (progress.xp >= 100 && !evaluatedRef.current && !showDecision) {
+      evaluatedRef.current = true;
+      runEvaluation(progress);
+    }
+    if (progress.xp < 100) evaluatedRef.current = false;
+  }, [progress, showDecision, runEvaluation]);
 
-  useEffect(() => {
-    const interval = setInterval(() => {
-      const fresh = getProgress();
-      setProgress(fresh);
-      if (shouldEvaluate(fresh) && !evaluatingRef.current && !showDecision) {
-        runEvaluation(fresh);
-      }
-    }, 2000);
-    return () => clearInterval(interval);
-  }, [showDecision, getProgress, shouldEvaluate, runEvaluation]);
-
-  function handleAccept() {
-    if (!decision || !progress) return;
-    const updated = applyVerdict(decision.verdict, progress);
-    setProgress(updated);
-    setShowDecision(false);
-    setDecision(null);
-    onLevelChange?.(updated.level);
+  async function handleAccept() {
+    if (!decision) return;
+    setAccepting(true);
+    try {
+      await onAcceptVerdict(decision.verdict);
+      setShowDecision(false);
+      setDecision(null);
+    } finally {
+      setAccepting(false);
+    }
   }
 
   if (!progress) return null;
@@ -228,7 +219,7 @@ export function ProgressTracker<P extends BaseProgress, D extends BaseDecision =
             <p className="text-sm text-ink">{decision.nextFocus}</p>
           </div>
 
-          <Button onClick={handleAccept} size="lg" className="w-full">
+          <Button onClick={handleAccept} loading={accepting} size="lg" className="w-full">
             {decision.verdict === "advance"
               ? `Move to Level ${Math.min(progress.level + 1, maxLevel)}`
               : decision.verdict === "drop"

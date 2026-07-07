@@ -1,9 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { Target, TrendingUp, Zap, RefreshCw } from "lucide-react";
-import { getSpeakingProgress, getSpeakingTopWeaknesses, getRecentSpeakingSessions } from "@/lib/speakingProgress";
-import type { SpeakingProgress } from "@/lib/types";
+import { Target, TrendingUp, Zap } from "lucide-react";
+import { getSpeakingTopWeaknesses, getRecentSpeakingSessions } from "@/lib/speakingProgress";
+import { useSpeakingProgress } from "@/components/providers/ProgressProvider";
 
 const DRILLS: Record<string, string> = {
   "articulation": "Read a passage aloud slowly, emphasising every consonant. Record yourself and listen back.",
@@ -23,14 +22,7 @@ function getDrill(weakness: string): string {
 }
 
 export default function SpeakingWeaknessDetector() {
-  const [progress, setProgress] = useState<SpeakingProgress | null>(null);
-
-  // localStorage is client-only; reading it in a lazy initializer would
-  // desync the server-rendered HTML from the client's first paint.
-  useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setProgress(getSpeakingProgress());
-  }, []);
+  const { progress } = useSpeakingProgress();
 
   if (!progress) return null;
 
@@ -108,10 +100,6 @@ export default function SpeakingWeaknessDetector() {
           </div>
         </div>
       )}
-
-      <button onClick={() => setProgress(getSpeakingProgress())} className="flex items-center justify-center gap-2 rounded-md border border-ink/10 py-3 text-sm text-ink-soft hover:border-maroon/30 hover:text-ink">
-        <RefreshCw size={13} /> Refresh
-      </button>
     </div>
   );
 }

@@ -2,8 +2,9 @@
 
 import { Trophy } from "lucide-react";
 import { ProgressTracker } from "@/components/ProgressTracker";
-import { getProgress, applyVerdict, shouldEvaluate, getTopWeaknesses } from "@/lib/progress";
-import type { ProgressionDecision } from "@/lib/types";
+import { useDebateProgress } from "@/components/providers/ProgressProvider";
+import { getTopWeaknesses } from "@/lib/progress";
+import type { DebateProgress, ProgressionDecision } from "@/lib/types";
 
 const LEVEL_LABELS: Record<number, string> = {
   1: "Foundations",
@@ -16,19 +17,24 @@ export default function ProgressBar({
 }: {
   onLevelChange?: (newLevel: number) => void;
 }) {
+  const { progress, applyVerdict } = useDebateProgress();
+
+  async function handleAccept(verdict: "advance" | "stay" | "drop") {
+    const updated = await applyVerdict(verdict);
+    if (updated) onLevelChange?.(updated.level);
+  }
+
   return (
-    <ProgressTracker<ReturnType<typeof getProgress>, ProgressionDecision>
+    <ProgressTracker<DebateProgress, ProgressionDecision>
       icon={Trophy}
       eyebrow="Current level"
       levelLabels={LEVEL_LABELS}
       maxLevel={3}
       maxLevelMessage="You've reached the highest level — Competition"
       evaluateEndpoint="/api/debate/progress"
-      getProgress={getProgress}
-      shouldEvaluate={shouldEvaluate}
-      applyVerdict={applyVerdict}
+      progress={progress}
       getTopWeaknesses={getTopWeaknesses}
-      onLevelChange={onLevelChange}
+      onAcceptVerdict={handleAccept}
     />
   );
 }

@@ -5,7 +5,7 @@ import { clsx } from "clsx";
 import { Loader2, RefreshCw, Timer, Zap } from "lucide-react";
 import { FeedbackSkeleton } from "@/components/ui/FeedbackSkeleton";
 import { ScoreReveal } from "@/components/motion/ScoreReveal";
-import { recordSession, getProgress } from "@/lib/progress";
+import { useDebateProgress } from "@/components/providers/ProgressProvider";
 import type { RebuttalResult } from "@/lib/types";
 
 const GRADING_MESSAGES = [
@@ -46,7 +46,8 @@ interface RebuttalTrainerProps {
 }
 
 export default function RebuttalTrainer({ level: propLevel }: RebuttalTrainerProps) {
-  const [level] = useState(() => propLevel ?? getProgress().level);
+  const { recordSession } = useDebateProgress();
+  const [level] = useState(() => propLevel ?? 1);
   const [argument, setArgument] = useState("");
   const [rebuttals, setRebuttals] = useState(["", "", ""]);
   const [timeLeft, setTimeLeft] = useState(TIME_LIMIT);
@@ -95,7 +96,7 @@ export default function RebuttalTrainer({ level: propLevel }: RebuttalTrainerPro
       setResult(data);
       setPhase("feedback");
 
-      recordSession({
+      await recordSession({
         type: "rebuttal",
         level: level as 1 | 2 | 3,
         topic: argument,

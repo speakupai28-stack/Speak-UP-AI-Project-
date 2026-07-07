@@ -5,7 +5,6 @@ import { clsx } from "clsx";
 import { Loader2, ArrowRight, FileText, ChevronDown, ChevronUp } from "lucide-react";
 import { FeedbackSkeleton } from "@/components/ui/FeedbackSkeleton";
 import { ScoreReveal } from "@/components/motion/ScoreReveal";
-import { getProgress } from "@/lib/progress";
 import type { BuiltCase } from "@/lib/types";
 
 const BUILDING_MESSAGES = [
@@ -41,7 +40,7 @@ interface CaseBuilderProps {
 }
 
 export default function CaseBuilder({ level: propLevel }: CaseBuilderProps) {
-  const [level] = useState(() => propLevel ?? getProgress().level);
+  const [level] = useState(() => propLevel ?? 1);
   const [motion, setMotion] = useState(() => MOTIONS_BY_LEVEL[level]?.[0] ?? "");
   const [customMotion, setCustomMotion] = useState("");
   const [side, setSide] = useState<"Proposition" | "Opposition">("Proposition");

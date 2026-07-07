@@ -21,7 +21,7 @@ import {
 } from "lucide-react";
 import { FeedbackSkeleton } from "@/components/ui/FeedbackSkeleton";
 import { ScoreReveal } from "@/components/motion/ScoreReveal";
-import { useClientValue } from "@/lib/useClientValue";
+import { useMe } from "@/components/providers/ProgressProvider";
 import type { ResearchAnalysis, ResearchInput } from "@/lib/types";
 
 const BUILDING_MESSAGES = [
@@ -85,14 +85,8 @@ export default function ModelUNResearch() {
     bloc: "",
     speakerPosition: "",
   });
-  const experience = useClientValue(() => {
-    try {
-      const raw = localStorage.getItem("speakup_user");
-      return raw ? (JSON.parse(raw).experience ?? "beginner") : "beginner";
-    } catch {
-      return "beginner";
-    }
-  }, "beginner");
+  const { me } = useMe();
+  const experience = me?.experience ?? "beginner";
   const [loading, setLoading] = useState(false);
   const [analysis, setAnalysis] = useState<ResearchAnalysis | null>(null);
   const [error, setError] = useState<string | null>(null);

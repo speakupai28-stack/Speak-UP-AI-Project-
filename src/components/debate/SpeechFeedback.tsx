@@ -5,7 +5,7 @@ import { clsx } from "clsx";
 import { Loader2, Send, Mic, ArrowRight } from "lucide-react";
 import { FeedbackSkeleton } from "@/components/ui/FeedbackSkeleton";
 import { ScoreReveal } from "@/components/motion/ScoreReveal";
-import { recordSession, getProgress } from "@/lib/progress";
+import { useDebateProgress } from "@/components/providers/ProgressProvider";
 import type { SpeechFeedback as SpeechFeedbackType } from "@/lib/types";
 
 const ANALYZING_MESSAGES = [
@@ -37,7 +37,8 @@ interface SpeechFeedbackProps {
 }
 
 export default function SpeechFeedback({ level: propLevel }: SpeechFeedbackProps) {
-  const level = propLevel ?? getProgress().level;
+  const { recordSession } = useDebateProgress();
+  const level = propLevel ?? 1;
   const [topic, setTopic] = useState(TOPICS_BY_LEVEL[level]?.[0] ?? "");
   const [speechType, setSpeechType] = useState(SPEECH_TYPES[0]);
   const [speechText, setSpeechText] = useState("");
@@ -58,7 +59,7 @@ export default function SpeechFeedback({ level: propLevel }: SpeechFeedbackProps
       if (!res.ok) throw new Error();
       const data: SpeechFeedbackType = await res.json();
       setFeedback(data);
-      recordSession({
+      await recordSession({
         type: "speech",
         level: level as 1 | 2 | 3,
         topic,

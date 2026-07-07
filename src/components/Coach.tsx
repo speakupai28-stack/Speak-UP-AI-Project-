@@ -5,7 +5,7 @@ import { clsx } from "clsx";
 import { Send, Sparkles, MessageSquare, Globe2, Mic2, Target, ChevronRight } from "lucide-react";
 import Link from "next/link";
 import { ButtonLink } from "@/components/ui/Button";
-import type { UserData } from "@/lib/types";
+import { useMe } from "@/components/providers/ProgressProvider";
 
 interface ChatMessage {
   role: "user" | "assistant";
@@ -39,39 +39,24 @@ const STARTER_PROMPTS_BY_FOCUS: Record<string, string[]> = {
   ],
 };
 
-function readUser(): UserData | null {
-  if (typeof window === "undefined") return null;
-  try {
-    const raw = localStorage.getItem("speakup_user");
-    return raw ? JSON.parse(raw) : null;
-  } catch {
-    return null;
-  }
-}
-
 export default function Coach() {
-  const [user, setUser] = useState<UserData | null>(null);
-  const [loaded, setLoaded] = useState(false);
+  const { me: user, loaded } = useMe();
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
   const [started, setStarted] = useState(false);
   const bottomRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
+  const greetedRef = useRef(false);
 
-  // localStorage is client-only; reading it in a lazy initializer would
-  // desync the server-rendered HTML from the client's first paint.
   useEffect(() => {
-    const u = readUser();
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setUser(u);
-    if (u) {
+    if (user && !greetedRef.current) {
+      greetedRef.current = true;
       const greeting =
-        u.profile?.greeting ?? `Hey ${u.name ?? ""}! I'm your personal coach. What are we working on today?`;
+        user.profile?.greeting ?? `Hey ${user.name ?? ""}! I'm your personal coach. What are we working on today?`;
       setMessages([{ role: "assistant", content: greeting }]);
     }
-    setLoaded(true);
-  }, []);
+  }, [user]);
 
   const streamedTextRef = useRef("");
 

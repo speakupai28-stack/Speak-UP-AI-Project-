@@ -1,6 +1,5 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import Link from "next/link";
 import { clsx } from "clsx";
 import {
@@ -20,9 +19,7 @@ import {
 import { Card } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
 import { ButtonLink } from "@/components/ui/Button";
-import { getProgress } from "@/lib/progress";
-import { getSpeakingProgress } from "@/lib/speakingProgress";
-import type { UserData } from "@/lib/types";
+import { useMe, useDebateProgress, useSpeakingProgress } from "@/components/providers/ProgressProvider";
 
 const SECTION_CARDS = [
   {
@@ -85,45 +82,23 @@ function computeStreak(dates: string[]): number {
   return streak;
 }
 
-function readUser(): UserData | null {
-  if (typeof window === "undefined") return null;
-  try {
-    const raw = localStorage.getItem("speakup_user");
-    return raw ? JSON.parse(raw) : null;
-  } catch {
-    return null;
-  }
-}
-
-const EMPTY_STATS = { sessions: 0, streak: 0, avgScore: null as number | null, focusAreasTracked: 0 };
-
 export default function Dashboard() {
-  const [user, setUser] = useState<UserData | null>(null);
-  const [loaded, setLoaded] = useState(false);
-  const [stats, setStats] = useState(EMPTY_STATS);
+  const { me: user, loaded } = useMe();
+  const { progress: debate } = useDebateProgress();
+  const { progress: speaking } = useSpeakingProgress();
 
-  // localStorage is client-only; reading it in a lazy initializer would
-  // desync the server-rendered HTML from the client's first paint.
-  useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setUser(readUser());
-
-    const debate = getProgress();
-    const speaking = getSpeakingProgress();
-    const allSessions = [...debate.sessions, ...speaking.sessions];
-    const scores = allSessions.map((s) => s.score).filter((s) => typeof s === "number");
-    const weaknessLabels = new Set([
-      ...Object.keys(debate.weaknesses),
-      ...Object.keys(speaking.weaknesses),
-    ]);
-    setStats({
-      sessions: allSessions.length,
-      streak: computeStreak(allSessions.map((s) => s.date)),
-      avgScore: scores.length > 0 ? scores.reduce((a, b) => a + b, 0) / scores.length : null,
-      focusAreasTracked: weaknessLabels.size,
-    });
-    setLoaded(true);
-  }, []);
+  const allSessions = [...(debate?.sessions ?? []), ...(speaking?.sessions ?? [])];
+  const scores = allSessions.map((s) => s.score).filter((s) => typeof s === "number");
+  const weaknessLabels = new Set([
+    ...Object.keys(debate?.weaknesses ?? {}),
+    ...Object.keys(speaking?.weaknesses ?? {}),
+  ]);
+  const stats = {
+    sessions: allSessions.length,
+    streak: computeStreak(allSessions.map((s) => s.date)),
+    avgScore: scores.length > 0 ? scores.reduce((a, b) => a + b, 0) / scores.length : null,
+    focusAreasTracked: weaknessLabels.size,
+  };
 
   if (loaded && !user) {
     return (

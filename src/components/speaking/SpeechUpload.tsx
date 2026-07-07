@@ -5,7 +5,7 @@ import { clsx } from "clsx";
 import { Mic2, Loader2, Send, ArrowRight } from "lucide-react";
 import { FeedbackSkeleton } from "@/components/ui/FeedbackSkeleton";
 import { ScoreReveal } from "@/components/motion/ScoreReveal";
-import { recordSpeakingSession, getSpeakingProgress } from "@/lib/speakingProgress";
+import { useSpeakingProgress } from "@/components/providers/ProgressProvider";
 import type { SpeechUploadFeedback } from "@/lib/types";
 
 const ANALYZING_MESSAGES = [
@@ -33,7 +33,8 @@ const AREA_COLORS: Record<string, string> = {
 interface SpeechUploadProps { level?: number; }
 
 export default function SpeechUpload({ level: propLevel }: SpeechUploadProps) {
-  const level = propLevel ?? getSpeakingProgress().level;
+  const { recordSession } = useSpeakingProgress();
+  const level = propLevel ?? 1;
   const [topic, setTopic] = useState(TOPICS_BY_LEVEL[level]?.[0] ?? "");
   const [customTopic, setCustomTopic] = useState("");
   const [speechText, setSpeechText] = useState("");
@@ -56,7 +57,7 @@ export default function SpeechUpload({ level: propLevel }: SpeechUploadProps) {
       if (!res.ok) throw new Error();
       const data: SpeechUploadFeedback = await res.json();
       setFeedback(data);
-      recordSpeakingSession({ type: "upload", level: level as 1|2|3, topic: finalTopic, score: data.overallScore, weaknesses: [data.weakness] });
+      await recordSession({ type: "upload", level: level as 1|2|3, topic: finalTopic, score: data.overallScore, weaknesses: [data.weakness] });
       setTimeout(() => document.getElementById("su-feedback")?.scrollIntoView({ behavior: "smooth" }), 100);
     } catch { setError("Something went wrong. Try again."); }
     finally { setLoading(false); }

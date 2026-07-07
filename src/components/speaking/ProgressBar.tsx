@@ -2,13 +2,9 @@
 
 import { Mic2 } from "lucide-react";
 import { ProgressTracker } from "@/components/ProgressTracker";
-import {
-  getSpeakingProgress,
-  applySpeakingVerdict,
-  shouldEvaluateSpeaking,
-  getSpeakingTopWeaknesses,
-} from "@/lib/speakingProgress";
-import type { SpeakingProgressionDecision } from "@/lib/types";
+import { useSpeakingProgress } from "@/components/providers/ProgressProvider";
+import { getSpeakingTopWeaknesses } from "@/lib/speakingProgress";
+import type { SpeakingProgress, SpeakingProgressionDecision } from "@/lib/types";
 
 const LEVEL_LABELS: Record<number, string> = {
   1: "Foundations",
@@ -21,19 +17,24 @@ export default function SpeakingProgressBar({
 }: {
   onLevelChange?: (l: number) => void;
 }) {
+  const { progress, applyVerdict } = useSpeakingProgress();
+
+  async function handleAccept(verdict: "advance" | "stay" | "drop") {
+    const updated = await applyVerdict(verdict);
+    if (updated) onLevelChange?.(updated.level);
+  }
+
   return (
-    <ProgressTracker<ReturnType<typeof getSpeakingProgress>, SpeakingProgressionDecision>
+    <ProgressTracker<SpeakingProgress, SpeakingProgressionDecision>
       icon={Mic2}
       eyebrow="Speaking level"
       levelLabels={LEVEL_LABELS}
       maxLevel={3}
       maxLevelMessage="You've reached the highest level — Performance"
       evaluateEndpoint="/api/public-speaking/progress"
-      getProgress={getSpeakingProgress}
-      shouldEvaluate={shouldEvaluateSpeaking}
-      applyVerdict={applySpeakingVerdict}
+      progress={progress}
       getTopWeaknesses={getSpeakingTopWeaknesses}
-      onLevelChange={onLevelChange}
+      onAcceptVerdict={handleAccept}
     />
   );
 }

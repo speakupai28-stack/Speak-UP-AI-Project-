@@ -7,7 +7,7 @@ import { Card } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { ScoreReveal } from "@/components/motion/ScoreReveal";
-import { recordSession } from "@/lib/progress";
+import { useDebateProgress } from "@/components/providers/ProgressProvider";
 import type { SparringMessage, JudgeBallot } from "@/lib/types";
 
 const MOTIONS_BY_LEVEL: Record<number, string[]> = {
@@ -44,6 +44,7 @@ async function streamOpponentReply(
 }
 
 export default function SparringPartner({ level: propLevel }: SparringPartnerProps) {
+  const { recordSession } = useDebateProgress();
   const level = propLevel ?? 1;
   const motions = MOTIONS_BY_LEVEL[level] ?? MOTIONS_BY_LEVEL[1];
   const [motion, setMotion] = useState(() => motions[0] ?? "");
@@ -135,7 +136,7 @@ export default function SparringPartner({ level: propLevel }: SparringPartnerPro
       setPhase("done");
 
       const studentWon = data.winner === studentSide;
-      recordSession({
+      await recordSession({
         type: "sparring",
         level: level as 1 | 2 | 3,
         topic: motion,

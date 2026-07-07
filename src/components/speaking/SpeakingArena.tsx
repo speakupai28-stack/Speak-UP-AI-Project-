@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { BookOpen, Mic2, Star, Target } from "lucide-react";
 import { Badge } from "@/components/ui/Badge";
 import { Tabs, TabPanel, type TabItem } from "@/components/ui/Tabs";
@@ -8,7 +8,7 @@ import SpeakingProgressBar from "./ProgressBar";
 import SpeechUpload from "./SpeechUpload";
 import EventPractice from "./EventPractice";
 import SpeakingWeaknessDetector from "./WeaknessDetector";
-import { getSpeakingProgress } from "@/lib/speakingProgress";
+import { useSpeakingProgress } from "@/components/providers/ProgressProvider";
 
 const TABS: TabItem[] = [
   { id: "lessons", label: "Lessons", icon: BookOpen },
@@ -31,14 +31,8 @@ interface SpeakingArenaProps {
 
 export default function SpeakingArena({ LessonsComponent }: SpeakingArenaProps) {
   const [tab, setTab] = useState<Tab>("lessons");
-  const [level, setLevel] = useState<number>(1);
-
-  // localStorage is client-only; reading it in a lazy initializer would
-  // desync the server-rendered HTML from the client's first paint.
-  useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setLevel(getSpeakingProgress().level);
-  }, []);
+  const { progress } = useSpeakingProgress();
+  const level = progress?.level ?? 1;
 
   return (
     <div className="mx-auto max-w-4xl px-6 py-6">
@@ -48,7 +42,7 @@ export default function SpeakingArena({ LessonsComponent }: SpeakingArenaProps) 
         </Badge>
       </div>
 
-      <SpeakingProgressBar onLevelChange={(l) => setLevel(l)} />
+      <SpeakingProgressBar />
 
       <Tabs tabs={TABS} active={tab} onChange={(id) => setTab(id as Tab)} className="mb-6" />
 

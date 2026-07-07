@@ -1,9 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { Target, TrendingUp, Zap, RefreshCw } from "lucide-react";
-import { getProgress, getTopWeaknesses, getRecentSessions } from "@/lib/progress";
-import type { DebateProgress } from "@/lib/types";
+import { Target, TrendingUp, Zap } from "lucide-react";
+import { getTopWeaknesses, getRecentSessions } from "@/lib/progress";
+import { useDebateProgress } from "@/components/providers/ProgressProvider";
 
 const DRILLS: Record<string, string> = {
   "impact weighing": "After every argument you write, add one sentence: 'This matters more than the opposition's argument because...'",
@@ -22,14 +21,7 @@ function getDrillForWeakness(weakness: string): string {
 }
 
 export default function WeaknessDetector() {
-  const [progress, setProgress] = useState<DebateProgress | null>(null);
-
-  // localStorage is client-only; reading it in a lazy initializer would
-  // desync the server-rendered HTML from the client's first paint.
-  useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setProgress(getProgress());
-  }, []);
+  const { progress } = useDebateProgress();
 
   if (!progress) return null;
 
@@ -119,10 +111,6 @@ export default function WeaknessDetector() {
           </div>
         </div>
       )}
-
-      <button onClick={() => setProgress(getProgress())} className="flex items-center justify-center gap-2 rounded-md border border-ink/10 py-3 text-sm text-ink-soft hover:border-maroon/50 hover:text-ink">
-        <RefreshCw size={13} /> Refresh
-      </button>
     </div>
   );
 }
