@@ -4,6 +4,7 @@ import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { XP_PER_SESSION } from "@/lib/progress";
 import { serializeDebateProgress } from "@/lib/serializeProgress";
+import { isFreeTierLimitReached } from "@/lib/planLimits";
 
 const sessionSchema = z.object({
   type: z.enum(["speech", "sparring", "rebuttal", "case_builder"]),
@@ -24,6 +25,13 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Invalid input" }, { status: 400 });
   }
   const { type, level, topic, score, weaknesses } = parsed.data;
+
+  if (await isFreeTierLimitReached(session.user.id)) {
+    return NextResponse.json(
+      { error: "upgrade_required", message: "You've used all 5 free sessions this month." },
+      { status: 402 }
+    );
+  }
 
   const progress = await prisma.debateProgress.findUnique({
     where: { userId: session.user.id },

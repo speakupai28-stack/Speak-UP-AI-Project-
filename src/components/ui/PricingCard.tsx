@@ -1,6 +1,7 @@
 import { Check } from "lucide-react";
 import { clsx } from "clsx";
 import { ButtonLink } from "./Button";
+import { UpgradeButton, type PaidTier } from "@/components/UpgradeButton";
 
 interface PricingCardProps {
   name: string;
@@ -10,6 +11,7 @@ interface PricingCardProps {
   features: string[];
   ctaLabel: string;
   ctaHref: string;
+  ctaTier?: PaidTier;
   featured?: boolean;
   footnote?: string;
 }
@@ -22,6 +24,7 @@ export function PricingCard({
   features,
   ctaLabel,
   ctaHref,
+  ctaTier,
   featured = false,
   footnote,
 }: PricingCardProps) {
@@ -75,14 +78,25 @@ export function PricingCard({
         ))}
       </ul>
 
-      <ButtonLink
-        href={ctaHref}
-        variant={featured ? "inverse" : "secondary"}
-        size="lg"
-        className="mt-7 w-full"
-      >
-        {ctaLabel}
-      </ButtonLink>
+      {ctaTier ? (
+        <UpgradeButton
+          tier={ctaTier}
+          variant={featured ? "inverse" : "secondary"}
+          size="lg"
+          className="mt-7 w-full"
+        >
+          {ctaLabel}
+        </UpgradeButton>
+      ) : (
+        <ButtonLink
+          href={ctaHref}
+          variant={featured ? "inverse" : "secondary"}
+          size="lg"
+          className="mt-7 w-full"
+        >
+          {ctaLabel}
+        </ButtonLink>
+      )}
 
       {footnote && (
         <p

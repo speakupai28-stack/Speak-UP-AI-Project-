@@ -16,6 +16,19 @@ import { PricingCard } from "@/components/ui/PricingCard";
 import { Reveal, StaggerGroup, StaggerItem } from "@/components/motion/Reveal";
 import { CountUp } from "@/components/motion/CountUp";
 import { HeroTranscript } from "@/components/marketing/HeroTranscript";
+import type { PaidTier } from "@/components/UpgradeButton";
+
+interface PricingTier {
+  name: string;
+  price: string;
+  cadence: string;
+  description: string;
+  features: string[];
+  ctaLabel: string;
+  ctaHref: string;
+  ctaTier?: PaidTier;
+  featured?: boolean;
+}
 
 const DISCIPLINES = [
   {
@@ -71,7 +84,7 @@ const STEPS = [
   },
 ];
 
-const PRICING = [
+const PRICING: PricingTier[] = [
   {
     name: "Free",
     price: "$0",
@@ -97,6 +110,7 @@ const PRICING = [
     ],
     ctaLabel: "Get Student Pro",
     ctaHref: "/onboarding",
+    ctaTier: "STUDENT_PRO",
     featured: true,
   },
   {
@@ -112,6 +126,7 @@ const PRICING = [
     ],
     ctaLabel: "Bring it to your school",
     ctaHref: "/onboarding",
+    ctaTier: "SCHOOL",
   },
   {
     name: "Competition Prep",
@@ -126,6 +141,7 @@ const PRICING = [
     ],
     ctaLabel: "Prep for competition",
     ctaHref: "/onboarding",
+    ctaTier: "COMPETITION_PREP",
   },
 ];
 
