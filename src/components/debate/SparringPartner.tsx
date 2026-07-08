@@ -1,9 +1,13 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useRef, useState } from "react";
 import { clsx } from "clsx";
-import { Loader2, Send, Swords, RefreshCw, Gavel } from "lucide-react";
-import { getProgress, recordSession } from "@/lib/progress";
+import { Send, Swords, RefreshCw, Gavel } from "lucide-react";
+import { Card } from "@/components/ui/Card";
+import { Badge } from "@/components/ui/Badge";
+import { Button } from "@/components/ui/Button";
+import { ScoreReveal } from "@/components/motion/ScoreReveal";
+import { useDebateProgress } from "@/components/providers/ProgressProvider";
 import type { SparringMessage, JudgeBallot } from "@/lib/types";
 
 const MOTIONS_BY_LEVEL: Record<number, string[]> = {
@@ -16,9 +20,34 @@ interface SparringPartnerProps {
   level?: number;
 }
 
+async function streamOpponentReply(
+  body: object,
+  onChunk: (fullTextSoFar: string) => void
+) {
+  const res = await fetch("/api/debate/sparring", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body),
+  });
+  if (!res.ok || !res.body) throw new Error();
+
+  const reader = res.body.getReader();
+  const decoder = new TextDecoder();
+  let full = "";
+  while (true) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    full += decoder.decode(value, { stream: true });
+    onChunk(full);
+  }
+  return full;
+}
+
 export default function SparringPartner({ level: propLevel }: SparringPartnerProps) {
-  const [level, setLevel] = useState(propLevel ?? 1);
-  const [motion, setMotion] = useState("");
+  const { recordSession } = useDebateProgress();
+  const level = propLevel ?? 1;
+  const motions = MOTIONS_BY_LEVEL[level] ?? MOTIONS_BY_LEVEL[1];
+  const [motion, setMotion] = useState(() => motions[0] ?? "");
   const [studentSide, setStudentSide] = useState<"Proposition" | "Opposition">("Proposition");
   const [messages, setMessages] = useState<SparringMessage[]>([]);
   const [input, setInput] = useState("");
@@ -28,51 +57,59 @@ export default function SparringPartner({ level: propLevel }: SparringPartnerPro
   const [speechCount, setSpeechCount] = useState(0);
   const bottomRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
-    const p = getProgress();
-    setLevel(propLevel ?? p.level);
-    const motions = MOTIONS_BY_LEVEL[p.level ?? 1];
-    setMotion(motions?.[0] ?? "");
-  }, [propLevel]);
-
-  useEffect(() => {
+  function scrollDown() {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages]);
+  }
 
   async function startDebate() {
     setPhase("debate");
     setLoading(true);
+    setMessages([{ role: "opponent", content: "" }]);
     try {
-      const res = await fetch("/api/debate/sparring", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ motion, studentSide, messages: [], level }),
-      });
-      const data = await res.json();
-      setMessages([{ role: "opponent", content: data.response }]);
-    } catch {}
-    finally { setLoading(false); }
+      await streamOpponentReply(
+        { motion, studentSide, messages: [], level },
+        (text) => {
+          setMessages([{ role: "opponent", content: text }]);
+          scrollDown();
+        }
+      );
+    } catch {
+      setMessages([{ role: "opponent", content: "Something went wrong. Try starting again." }]);
+    } finally {
+      setLoading(false);
+    }
   }
 
   async function sendMessage() {
     if (!input.trim() || loading) return;
     const userMsg: SparringMessage = { role: "student", content: input };
     const newMessages = [...messages, userMsg];
-    setMessages(newMessages);
+    setMessages([...newMessages, { role: "opponent", content: "" }]);
     setInput("");
     setSpeechCount((c) => c + 1);
     setLoading(true);
 
     try {
-      const res = await fetch("/api/debate/sparring", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ motion, studentSide, messages: newMessages, level }),
+      await streamOpponentReply(
+        { motion, studentSide, messages: newMessages, level },
+        (text) => {
+          setMessages((prev) => {
+            const next = [...prev];
+            next[next.length - 1] = { role: "opponent", content: text };
+            return next;
+          });
+          scrollDown();
+        }
+      );
+    } catch {
+      setMessages((prev) => {
+        const next = [...prev];
+        next[next.length - 1] = { role: "opponent", content: "Something went wrong." };
+        return next;
       });
-      const data = await res.json();
-      setMessages((prev) => [...prev, { role: "opponent", content: data.response }]);
-    } catch {}
-    finally { setLoading(false); }
+    } finally {
+      setLoading(false);
+    }
   }
 
   async function requestJudge() {
@@ -99,15 +136,18 @@ export default function SparringPartner({ level: propLevel }: SparringPartnerPro
       setPhase("done");
 
       const studentWon = data.winner === studentSide;
-      recordSession({
+      await recordSession({
         type: "sparring",
         level: level as 1 | 2 | 3,
         topic: motion,
         score: studentWon ? Math.min(10, Math.round(data.score / 10)) : Math.max(3, Math.round(data.score / 10) - 2),
         weaknesses: [data.mainImprovement],
       });
-    } catch {}
-    finally { setLoading(false); }
+    } catch {
+      // leave phase as "judging"; user can retry via reset
+    } finally {
+      setLoading(false);
+    }
   }
 
   function reset() {
@@ -118,33 +158,31 @@ export default function SparringPartner({ level: propLevel }: SparringPartnerPro
     setPhase("setup");
   }
 
-  const motions = MOTIONS_BY_LEVEL[level] ?? MOTIONS_BY_LEVEL[1];
-
   return (
     <div className="flex flex-col gap-5">
-      <div className="glass-card rounded-2xl p-5">
+      <Card padding="md">
         <div className="mb-2 flex items-center gap-2">
-          <Swords size={16} className="text-rose-400" />
-          <span className="text-xs font-semibold uppercase tracking-wide text-rose-400">Sparring Partner</span>
-          <span className="ml-auto rounded-full border border-[#1E293B] px-2 py-0.5 text-xs text-[#94A3B8]">Level {level}</span>
+          <Swords size={16} className="text-maroon" />
+          <span className="text-xs font-semibold uppercase tracking-wide text-maroon">Sparring Partner</span>
+          <Badge variant="neutral" className="ml-auto">Level {level}</Badge>
         </div>
-        <p className="text-sm text-[#94A3B8]">
+        <p className="text-sm text-ink-soft">
           {level === 1 && "Debate against your coach. They'll challenge you, ask POIs, and help you practice responding."}
           {level === 2 && "Spar against a skilled opponent who will attack your weak points and run strategic arguments."}
           {level === 3 && "Face a relentless competition-level opponent. No mercy — every weakness gets exploited."}
         </p>
-      </div>
+      </Card>
 
       {/* Setup */}
       {phase === "setup" && (
         <div className="flex flex-col gap-4">
           <div>
-            <label className="mb-2 block text-sm font-medium text-[#94A3B8]">Motion</label>
+            <label className="mb-2 block text-sm font-medium text-ink-soft">Motion</label>
             <div className="flex flex-col gap-2">
               {motions.map((m) => (
                 <button key={m} type="button" onClick={() => setMotion(m)}
-                  className={clsx("rounded-xl border px-4 py-3 text-left text-sm transition-all",
-                    motion === m ? "border-[#6366F1] bg-[#6366F1]/10 text-[#F1F5F9] ring-1 ring-[#6366F1]" : "border-[#1E293B] bg-[#111827] text-[#94A3B8] hover:border-[#6366F1]/50")}>
+                  className={clsx("rounded-md border px-4 py-3 text-left text-sm transition-all",
+                    motion === m ? "border-maroon bg-maroon/5 text-ink ring-1 ring-maroon" : "border-ink/10 bg-paper-dim text-ink-soft hover:border-maroon/40")}>
                   {m}
                 </button>
               ))}
@@ -152,51 +190,58 @@ export default function SparringPartner({ level: propLevel }: SparringPartnerPro
           </div>
 
           <div>
-            <label className="mb-2 block text-sm font-medium text-[#94A3B8]">Your Side</label>
+            <label className="mb-2 block text-sm font-medium text-ink-soft">Your Side</label>
             <div className="flex gap-2">
               {(["Proposition", "Opposition"] as const).map((s) => (
                 <button key={s} type="button" onClick={() => setStudentSide(s)}
-                  className={clsx("flex-1 rounded-xl border py-3 text-sm font-semibold transition-all",
-                    studentSide === s ? s === "Proposition" ? "border-emerald-500/50 bg-emerald-500/10 text-emerald-400" : "border-rose-500/50 bg-rose-500/10 text-rose-400"
-                    : "border-[#1E293B] bg-[#111827] text-[#94A3B8]")}>
+                  className={clsx("flex-1 rounded-md border py-3 text-sm font-semibold transition-all",
+                    studentSide === s ? "border-maroon bg-maroon/5 text-maroon" : "border-ink/10 bg-paper-dim text-ink-soft")}>
                   {s}
                 </button>
               ))}
             </div>
           </div>
 
-          <button onClick={startDebate} disabled={!motion}
-            className="flex items-center justify-center gap-2 rounded-xl bg-[#6366F1] py-4 font-semibold text-white hover:bg-[#4F46E5]">
+          <Button onClick={startDebate} disabled={!motion} size="lg">
             <Swords size={16} /> Start Debate
-          </button>
+          </Button>
         </div>
       )}
 
       {/* Debate */}
       {(phase === "debate" || phase === "judging") && (
         <div className="flex flex-col gap-4">
-          <div className="rounded-xl border border-[#1E293B] bg-[#111827] px-4 py-2.5">
-            <p className="text-xs text-[#94A3B8]">Motion: <span className="font-medium text-[#F1F5F9]">{motion}</span> — You are <span className={clsx("font-semibold", studentSide === "Proposition" ? "text-emerald-400" : "text-rose-400")}>{studentSide}</span></p>
+          <div className="rounded-md border border-ink/10 bg-paper-dim px-4 py-2.5">
+            <p className="text-xs text-ink-soft">Motion: <span className="font-medium text-ink">{motion}</span> — You are <span className="font-semibold text-maroon">{studentSide}</span></p>
           </div>
 
           {/* Messages */}
-          <div className="flex max-h-96 flex-col gap-3 overflow-y-auto rounded-2xl border border-[#1E293B] bg-[#0A0F1E] p-4">
-            {messages.map((msg, i) => (
-              <div key={i} className={clsx("flex", msg.role === "student" ? "justify-end" : "justify-start")}>
-                <div className={clsx("max-w-[80%] rounded-2xl px-4 py-3 text-sm leading-relaxed",
-                  msg.role === "student" ? "bg-[#6366F1] text-white" : "bg-[#111827] text-[#94A3B8] border border-[#1E293B]")}>
-                  {msg.role === "opponent" && <p className="mb-1 text-xs font-bold text-rose-400">Opposition</p>}
-                  {msg.content}
+          <div className="flex max-h-96 flex-col gap-3 overflow-y-auto rounded-lg border border-ink/10 bg-paper-dim p-4">
+            {messages.map((msg, i) => {
+              const isStreamingBubble = loading && i === messages.length - 1 && msg.role === "opponent";
+              return (
+                <div key={i} className={clsx("flex", msg.role === "student" ? "justify-end" : "justify-start")}>
+                  <div className={clsx("max-w-[80%] whitespace-pre-wrap rounded-lg px-4 py-3 text-sm leading-relaxed",
+                    msg.role === "student" ? "bg-ink text-paper" : "border border-ink/10 bg-paper text-ink")}>
+                    {msg.role === "opponent" && <p className="mb-1 text-xs font-bold text-maroon">Opposition</p>}
+                    {isStreamingBubble && msg.content === "" ? (
+                      <span className="flex items-center gap-1 py-0.5 text-ink-soft">
+                        <span className="typing-dot" />
+                        <span className="typing-dot" />
+                        <span className="typing-dot" />
+                      </span>
+                    ) : (
+                      <>
+                        {msg.content}
+                        {isStreamingBubble && (
+                          <span aria-hidden="true" className="ml-0.5 inline-block h-3.5 w-[2px] -mb-0.5 animate-pulse bg-maroon" />
+                        )}
+                      </>
+                    )}
+                  </div>
                 </div>
-              </div>
-            ))}
-            {loading && (
-              <div className="flex justify-start">
-                <div className="rounded-2xl border border-[#1E293B] bg-[#111827] px-4 py-3">
-                  <Loader2 size={14} className="animate-spin text-[#94A3B8]" />
-                </div>
-              </div>
-            )}
+              );
+            })}
             <div ref={bottomRef} />
           </div>
 
@@ -204,39 +249,39 @@ export default function SparringPartner({ level: propLevel }: SparringPartnerPro
             <textarea rows={3} placeholder="Deliver your argument, respond to their point, or answer a POI…"
               value={input} onChange={(e) => setInput(e.target.value)}
               onKeyDown={(e) => { if (e.key === "Enter" && e.metaKey) sendMessage(); }}
-              className="flex-1 resize-none rounded-xl border border-[#1E293B] bg-[#111827] px-4 py-3 text-sm text-[#F1F5F9] placeholder-[#94A3B8]/50 outline-none focus:border-[#6366F1] focus:ring-1 focus:ring-[#6366F1]" />
+              className="flex-1 resize-none rounded-md border border-stone-light bg-paper px-4 py-3 text-sm text-ink placeholder:text-stone outline-none focus:border-maroon focus:ring-1 focus:ring-maroon" />
             <div className="flex flex-col gap-2">
               <button onClick={sendMessage} disabled={!input.trim() || loading}
-                className={clsx("flex h-12 w-12 items-center justify-center rounded-xl transition-colors",
-                  input.trim() && !loading ? "bg-[#6366F1] text-white hover:bg-[#4F46E5]" : "bg-[#1E293B] text-[#94A3B8]")}>
+                className={clsx("flex h-12 w-12 items-center justify-center rounded-md transition-colors",
+                  input.trim() && !loading ? "bg-maroon text-paper hover:bg-maroon-dark" : "bg-ink/10 text-stone")}>
                 <Send size={16} />
               </button>
               {speechCount >= 3 && (
                 <button onClick={requestJudge} title="Request judge ballot"
-                  className="flex h-12 w-12 items-center justify-center rounded-xl bg-amber-500/20 text-amber-400 hover:bg-amber-500/30">
+                  className="flex h-12 w-12 items-center justify-center rounded-md bg-gold/15 text-[#8a6b28] hover:bg-gold/25">
                   <Gavel size={16} />
                 </button>
               )}
             </div>
           </div>
-          {speechCount >= 3 && <p className="text-center text-xs text-[#94A3B8]">Tap <Gavel size={10} className="inline" /> to end the round and get a judge ballot</p>}
+          {speechCount >= 3 && <p className="text-center text-xs text-stone">Tap <Gavel size={10} className="inline" /> to end the round and get a judge ballot</p>}
         </div>
       )}
 
       {/* Ballot */}
       {phase === "done" && ballot && (
-        <div className="flex flex-col gap-4">
-          <div className={clsx("rounded-2xl border p-5", ballot.winner === studentSide ? "border-emerald-500/30 bg-emerald-500/10" : "border-rose-500/30 bg-rose-500/10")}>
+        <ScoreReveal revealKey={ballot.score} className="flex flex-col gap-4">
+          <div className={clsx("rounded-lg border p-5", ballot.winner === studentSide ? "border-forest/30 bg-forest/5" : "border-maroon/30 bg-maroon/5")}>
             <div className="mb-2 flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <Gavel size={16} className={ballot.winner === studentSide ? "text-emerald-400" : "text-rose-400"} />
-                <span className={clsx("font-bold", ballot.winner === studentSide ? "text-emerald-400" : "text-rose-400")}>
+                <Gavel size={16} className={ballot.winner === studentSide ? "text-forest" : "text-maroon"} />
+                <span className={clsx("font-display font-semibold", ballot.winner === studentSide ? "text-forest" : "text-maroon")}>
                   {ballot.winner === studentSide ? "You Win" : "You Lose"}
                 </span>
               </div>
-              <span className="text-xl font-bold text-[#F1F5F9]">{ballot.score}/100</span>
+              <span className="font-display text-xl font-semibold text-ink">{ballot.score}/100</span>
             </div>
-            <p className="text-sm text-[#F1F5F9]">{ballot.reasoning}</p>
+            <p className="text-sm text-ink">{ballot.reasoning}</p>
           </div>
 
           {[
@@ -244,24 +289,24 @@ export default function SparringPartner({ level: propLevel }: SparringPartnerPro
             { label: "Impact Weighing", value: ballot.impactWeighing },
             { label: "Best Moment", value: ballot.mvp },
           ].map(({ label, value }) => (
-            <div key={label} className="glass-card rounded-2xl p-5">
-              <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-[#94A3B8]">{label}</p>
-              <p className="text-sm text-[#94A3B8]">{value}</p>
-            </div>
+            <Card key={label} padding="md">
+              <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-stone">{label}</p>
+              <p className="text-sm text-ink-soft">{value}</p>
+            </Card>
           ))}
 
-          <div className="flex items-start gap-3 rounded-xl border border-amber-500/30 bg-amber-500/10 p-4">
-            <Gavel size={14} className="mt-0.5 shrink-0 text-amber-400" />
+          <div className="flex items-start gap-3 rounded-md border border-gold/30 bg-gold/5 p-4">
+            <Gavel size={14} className="mt-0.5 shrink-0 text-[#8a6b28]" />
             <div>
-              <p className="text-xs font-semibold text-amber-400">Main Improvement</p>
-              <p className="text-sm text-[#F1F5F9]">{ballot.mainImprovement}</p>
+              <p className="text-xs font-semibold text-[#8a6b28]">Main Improvement</p>
+              <p className="text-sm text-ink">{ballot.mainImprovement}</p>
             </div>
           </div>
 
-          <button onClick={reset} className="flex items-center justify-center gap-2 rounded-xl border border-[#1E293B] py-3 text-sm font-medium text-[#94A3B8] hover:border-[#6366F1]/50 hover:text-[#F1F5F9]">
+          <Button variant="secondary" onClick={reset}>
             <RefreshCw size={14} /> New Round
-          </button>
-        </div>
+          </Button>
+        </ScoreReveal>
       )}
     </div>
   );

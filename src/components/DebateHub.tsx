@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import { clsx } from "clsx";
 import {
   MessageSquare,
@@ -11,7 +10,10 @@ import {
   Swords,
   Trophy,
 } from "lucide-react";
-import { useEffect, useState } from "react";
+import { Card } from "@/components/ui/Card";
+import { Badge } from "@/components/ui/Badge";
+import { useMe } from "@/components/providers/ProgressProvider";
+import { ButtonLink } from "@/components/ui/Button";
 
 const LEVELS = [
   {
@@ -21,9 +23,6 @@ const LEVELS = [
     subtitle: "Learn how debate works from the ground up",
     href: "/debate/level-1",
     icon: BookOpen,
-    color: "from-indigo-500 to-purple-600",
-    borderColor: "border-indigo-500/30",
-    badgeColor: "bg-indigo-500/20 text-indigo-400",
     forWho: "Complete beginners & first-time debaters",
     goal: "Deliver a structured argument confidently",
     topics: [
@@ -45,9 +44,6 @@ const LEVELS = [
     subtitle: "Think ahead, adapt to opponents, and win rounds",
     href: "/debate/level-2",
     icon: Swords,
-    color: "from-violet-500 to-blue-600",
-    borderColor: "border-violet-500/30",
-    badgeColor: "bg-violet-500/20 text-violet-400",
     forWho: "Students who know the basics and want to win",
     goal: "Run complex arguments and outmaneuver opponents",
     topics: [
@@ -69,9 +65,6 @@ const LEVELS = [
     subtitle: "Prepare for tournaments and perform under pressure",
     href: "/debate/level-3",
     icon: Trophy,
-    color: "from-amber-500 to-rose-600",
-    borderColor: "border-amber-500/30",
-    badgeColor: "bg-amber-500/20 text-amber-400",
     forWho: "Experienced debaters heading to tournaments",
     goal: "Adapt to any judge and win elimination rounds",
     topics: [
@@ -89,17 +82,8 @@ const LEVELS = [
 ];
 
 export default function DebateHub() {
-  const [experience, setExperience] = useState<string | null>(null);
-
-  useEffect(() => {
-    const raw = localStorage.getItem("speakup_user");
-    if (raw) {
-      try {
-        const user = JSON.parse(raw);
-        setExperience(user.experience ?? null);
-      } catch {}
-    }
-  }, []);
+  const { me } = useMe();
+  const experience = me?.experience ?? null;
 
   const recommendedLevel =
     experience === "advanced" ? "level-3"
@@ -111,15 +95,15 @@ export default function DebateHub() {
       {/* Header */}
       <div className="mb-10">
         <div className="mb-3 flex items-center gap-2">
-          <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-linear-to-br from-indigo-500 to-purple-600">
-            <MessageSquare size={18} className="text-white" />
+          <div className="flex h-9 w-9 items-center justify-center rounded-md bg-maroon/10 text-maroon">
+            <MessageSquare size={18} />
           </div>
-          <span className="text-xs font-semibold uppercase tracking-wide text-[#94A3B8]">
+          <span className="text-xs font-semibold uppercase tracking-wide text-stone">
             Debate Training
           </span>
         </div>
-        <h1 className="mb-2 text-3xl font-bold text-[#F1F5F9]">Choose Your Level</h1>
-        <p className="text-[#94A3B8]">
+        <h1 className="mb-2 font-display text-3xl font-semibold text-ink">Choose Your Level</h1>
+        <p className="text-ink-soft">
           Each level builds on the last. Start at Foundations if you&apos;re new, or jump straight
           into Strategy or Competition if you&apos;re ready.
         </p>
@@ -127,22 +111,19 @@ export default function DebateHub() {
 
       {/* Level Cards */}
       <div className="flex flex-col gap-6">
-        {LEVELS.map(({ id, number, title, subtitle, href, icon: Icon, color, borderColor, badgeColor, forWho, goal, topics, coachStyle }) => {
+        {LEVELS.map(({ id, number, title, subtitle, href, icon: Icon, forWho, goal, topics, coachStyle }) => {
           const isRecommended = id === recommendedLevel;
 
           return (
-            <div
+            <Card
               key={id}
-              className={clsx(
-                "glass-card rounded-2xl border overflow-hidden",
-                isRecommended ? "border-[#6366F1]/50" : "border-[#1E293B]"
-              )}
+              padding="none"
+              className={clsx("overflow-hidden", isRecommended && "border-maroon/40")}
             >
-              {/* Recommended Banner */}
               {isRecommended && (
-                <div className="flex items-center gap-2 border-b border-[#6366F1]/30 bg-[#6366F1]/10 px-5 py-2">
-                  <CheckCircle2 size={13} className="text-[#6366F1]" />
-                  <span className="text-xs font-semibold text-[#6366F1]">
+                <div className="flex items-center gap-2 border-b border-maroon/20 bg-maroon/5 px-5 py-2">
+                  <CheckCircle2 size={13} className="text-maroon" />
+                  <span className="text-xs font-semibold text-maroon">
                     Recommended based on your profile
                   </span>
                 </div>
@@ -152,70 +133,65 @@ export default function DebateHub() {
                 {/* Level Header */}
                 <div className="mb-5 flex items-start justify-between gap-4">
                   <div className="flex items-center gap-4">
-                    <div className={clsx("flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-linear-to-br", color)}>
-                      <Icon size={22} className="text-white" />
+                    <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-md bg-maroon/10 text-maroon">
+                      <Icon size={22} />
                     </div>
                     <div>
-                      <div className="mb-1 flex items-center gap-2">
-                        <span className={clsx("rounded-full px-2.5 py-0.5 text-xs font-semibold", badgeColor)}>
-                          Level {number}
-                        </span>
+                      <div className="mb-1">
+                        <Badge variant="maroon">Level {number}</Badge>
                       </div>
-                      <h2 className="text-xl font-bold text-[#F1F5F9]">{title}</h2>
-                      <p className="text-sm text-[#94A3B8]">{subtitle}</p>
+                      <h2 className="font-display text-xl font-semibold text-ink">{title}</h2>
+                      <p className="text-sm text-ink-soft">{subtitle}</p>
                     </div>
                   </div>
-                  <Link
-                    href={href}
-                    className="flex shrink-0 items-center gap-1.5 rounded-xl bg-[#6366F1] px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-[#4F46E5]"
-                  >
+                  <ButtonLink href={href} size="sm" className="shrink-0">
                     Start <ChevronRight size={14} />
-                  </Link>
+                  </ButtonLink>
                 </div>
 
                 {/* Meta */}
                 <div className="mb-5 grid gap-3 sm:grid-cols-2">
-                  <div className="rounded-xl border border-[#1E293B] bg-[#0A0F1E] p-3">
-                    <p className="mb-0.5 text-xs text-[#94A3B8]">Who it&apos;s for</p>
-                    <p className="text-sm font-medium text-[#F1F5F9]">{forWho}</p>
+                  <div className="rounded-md border border-ink/10 bg-paper-dim p-3">
+                    <p className="mb-0.5 text-xs text-stone">Who it&apos;s for</p>
+                    <p className="text-sm font-medium text-ink">{forWho}</p>
                   </div>
-                  <div className="rounded-xl border border-[#1E293B] bg-[#0A0F1E] p-3">
-                    <p className="mb-0.5 text-xs text-[#94A3B8]">Your goal</p>
-                    <p className="text-sm font-medium text-[#F1F5F9]">{goal}</p>
+                  <div className="rounded-md border border-ink/10 bg-paper-dim p-3">
+                    <p className="mb-0.5 text-xs text-stone">Your goal</p>
+                    <p className="text-sm font-medium text-ink">{goal}</p>
                   </div>
                 </div>
 
                 {/* Topics */}
                 <div className="mb-4">
-                  <p className="mb-2.5 text-xs font-semibold uppercase tracking-wide text-[#94A3B8]">
+                  <p className="mb-2.5 text-xs font-semibold uppercase tracking-wide text-stone">
                     What you&apos;ll learn
                   </p>
                   <div className="grid gap-1.5 sm:grid-cols-2">
                     {topics.map((topic, i) => (
                       <div key={i} className="flex items-start gap-2">
-                        <span className="mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-[#6366F1]/20 text-[10px] font-bold text-[#6366F1]">
+                        <span className="mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-maroon/10 text-[10px] font-bold text-maroon">
                           {i + 1}
                         </span>
-                        <p className="text-xs text-[#94A3B8]">{topic}</p>
+                        <p className="text-xs text-ink-soft">{topic}</p>
                       </div>
                     ))}
                   </div>
                 </div>
 
                 {/* Coach Style */}
-                <div className={clsx("rounded-xl border px-4 py-2.5", borderColor)}>
-                  <span className="text-xs text-[#94A3B8]">
-                    Coach style: <span className="font-medium text-[#F1F5F9]">{coachStyle}</span>
+                <div className="rounded-md border border-ink/10 px-4 py-2.5">
+                  <span className="text-xs text-ink-soft">
+                    Coach style: <span className="font-medium text-ink">{coachStyle}</span>
                   </span>
                 </div>
               </div>
-            </div>
+            </Card>
           );
         })}
       </div>
 
       {/* Locked hint */}
-      <div className="mt-6 flex items-center justify-center gap-2 text-xs text-[#94A3B8]">
+      <div className="mt-6 flex items-center justify-center gap-2 text-xs text-stone">
         <Lock size={12} />
         All levels are available. Complete each one to track your progress.
       </div>

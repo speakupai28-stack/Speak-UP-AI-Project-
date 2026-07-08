@@ -1,25 +1,42 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { clsx } from "clsx";
+import { Menu, X, LogOut } from "lucide-react";
+import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
+import { useSession, signOut } from "next-auth/react";
+import { ButtonLink, Button } from "@/components/ui";
 
 const navLinks = [
-  { href: "/", label: "Home" },
   { href: "/debate", label: "Debate" },
   { href: "/model-un", label: "Model UN" },
   { href: "/public-speaking", label: "Public Speaking" },
   { href: "/coach", label: "Coach" },
+  { href: "/#pricing", label: "Pricing" },
 ];
 
 export default function Navbar() {
   const pathname = usePathname();
+  const [menuOpen, setMenuOpen] = useState(false);
+  const reduceMotion = useReducedMotion();
+  const { data: session, status } = useSession();
+  const authed = status === "authenticated";
 
   return (
-    <nav className="sticky top-0 z-50 border-b border-[#1E293B] bg-[#0A0F1E]/90 backdrop-blur-md">
+    <nav className="sticky top-0 z-50 border-b border-ink/10 bg-paper/90 backdrop-blur-md">
+      <a
+        href="#main-content"
+        className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-[100] focus:rounded-md focus:bg-ink focus:px-4 focus:py-2 focus:text-sm focus:font-semibold focus:text-paper"
+      >
+        Skip to content
+      </a>
       <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
-        <Link href="/" className="flex items-center gap-2">
-          <span className="text-xl font-bold text-gradient">SpeakUP AI</span>
+        <Link href="/" className="flex items-center gap-2" onClick={() => setMenuOpen(false)}>
+          <span className="font-display text-xl font-semibold tracking-tight text-ink">
+            SpeakUP<span className="text-maroon">.</span>
+          </span>
         </Link>
 
         <div className="hidden items-center gap-8 md:flex">
@@ -28,10 +45,10 @@ export default function Navbar() {
               key={href}
               href={href}
               className={clsx(
-                "text-sm font-medium transition-colors",
-                pathname === href || (href !== "/" && pathname.startsWith(href))
-                  ? "text-[#6366F1]"
-                  : "text-[#94A3B8] hover:text-[#F1F5F9]"
+                "text-sm font-medium transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-maroon",
+                href !== "/#pricing" && (pathname === href || pathname.startsWith(href))
+                  ? "text-maroon"
+                  : "text-ink-soft hover:text-ink"
               )}
             >
               {label}
@@ -39,13 +56,94 @@ export default function Navbar() {
           ))}
         </div>
 
-        <Link
-          href="/onboarding"
-          className="rounded-full bg-[#6366F1] px-5 py-2 text-sm font-semibold text-white transition-colors hover:bg-[#4F46E5]"
-        >
-          Get Started
-        </Link>
+        <div className="flex items-center gap-3">
+          {authed ? (
+            <>
+              <span className="hidden text-sm text-ink-soft sm:inline">
+                {session.user?.name?.split(" ")[0] ?? "Account"}
+              </span>
+              <Button variant="secondary" size="sm" onClick={() => signOut({ callbackUrl: "/" })}>
+                <LogOut size={14} />
+                <span className="hidden sm:inline">Log out</span>
+              </Button>
+            </>
+          ) : (
+            <>
+              <Link
+                href="/login"
+                className="hidden text-sm font-medium text-ink-soft transition-colors hover:text-ink sm:block"
+              >
+                Log in
+              </Link>
+              <ButtonLink href="/onboarding" size="sm">
+                <span className="hidden sm:inline">Get Started</span>
+                <span className="sm:hidden">Start</span>
+              </ButtonLink>
+            </>
+          )}
+          <button
+            type="button"
+            onClick={() => setMenuOpen((o) => !o)}
+            aria-expanded={menuOpen}
+            aria-controls="mobile-menu"
+            aria-label={menuOpen ? "Close menu" : "Open menu"}
+            className="flex h-11 w-11 items-center justify-center rounded-md text-ink-soft transition-colors hover:bg-ink/5 hover:text-ink focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-maroon md:hidden"
+          >
+            {menuOpen ? <X size={20} /> : <Menu size={20} />}
+          </button>
+        </div>
       </div>
+
+      <AnimatePresence initial={false}>
+        {menuOpen && (
+          <motion.div
+            id="mobile-menu"
+            initial={reduceMotion ? undefined : { height: 0, opacity: 0 }}
+            animate={reduceMotion ? undefined : { height: "auto", opacity: 1 }}
+            exit={reduceMotion ? undefined : { height: 0, opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            className="overflow-hidden border-t border-ink/10 md:hidden"
+          >
+            <div className="flex flex-col gap-1 px-6 py-4">
+              {navLinks.map(({ href, label }) => (
+                <Link
+                  key={href}
+                  href={href}
+                  onClick={() => setMenuOpen(false)}
+                  className={clsx(
+                    "rounded-md px-3 py-3 text-base font-medium transition-colors",
+                    href !== "/#pricing" && (pathname === href || pathname.startsWith(href))
+                      ? "bg-maroon/10 text-maroon"
+                      : "text-ink-soft hover:bg-ink/5 hover:text-ink"
+                  )}
+                >
+                  {label}
+                </Link>
+              ))}
+              {!authed && (
+                <Link
+                  href="/login"
+                  onClick={() => setMenuOpen(false)}
+                  className="rounded-md px-3 py-3 text-base font-medium text-ink-soft transition-colors hover:bg-ink/5 hover:text-ink"
+                >
+                  Log in
+                </Link>
+              )}
+              {authed && (
+                <button
+                  onClick={() => {
+                    setMenuOpen(false);
+                    signOut({ callbackUrl: "/" });
+                  }}
+                  className="flex items-center gap-2 rounded-md px-3 py-3 text-left text-base font-medium text-ink-soft transition-colors hover:bg-ink/5 hover:text-ink"
+                >
+                  <LogOut size={16} /> Log out
+                </button>
+              )}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </nav>
   );
 }

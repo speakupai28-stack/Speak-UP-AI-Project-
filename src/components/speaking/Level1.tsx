@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { clsx } from "clsx";
 import { Mic2, ChevronDown, ChevronUp, ArrowRight, Lightbulb } from "lucide-react";
 
 const LESSONS = [
@@ -22,23 +21,23 @@ export default function SpeakingLevel1() {
       {LESSONS.map((lesson, i) => {
         const open = openLesson === i;
         return (
-          <div key={lesson.id} className="glass-card overflow-hidden rounded-2xl">
+          <div key={lesson.id} className="glass-card overflow-hidden rounded-lg">
             <button onClick={() => setOpenLesson(open ? -1 : i)} className="flex w-full items-center gap-4 p-5 text-left">
-              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-teal-500"><Mic2 size={16} className="text-white" /></div>
-              <div className="flex-1"><span className="text-xs font-semibold text-[#94A3B8]">Lesson {lesson.id}</span><p className="font-semibold text-[#F1F5F9]">{lesson.title}</p></div>
-              {open ? <ChevronUp size={16} className="shrink-0 text-[#94A3B8]" /> : <ChevronDown size={16} className="shrink-0 text-[#94A3B8]" />}
+              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-maroon/10"><Mic2 size={16} className="text-maroon" /></div>
+              <div className="flex-1"><span className="text-xs font-semibold text-ink-soft">Lesson {lesson.id}</span><p className="font-semibold text-ink">{lesson.title}</p></div>
+              {open ? <ChevronUp size={16} className="shrink-0 text-ink-soft" /> : <ChevronDown size={16} className="shrink-0 text-ink-soft" />}
             </button>
             {open && (
-              <div className="border-t border-[#1E293B] px-5 pb-5 pt-4 space-y-4">
-                <p className="text-sm leading-relaxed text-[#94A3B8]">{lesson.concept}</p>
-                {"points" in lesson && (lesson as {points:string[]}).points.map((p, idx) => <div key={idx} className="flex gap-2"><ArrowRight size={14} className="mt-0.5 shrink-0 text-teal-400" /><p className="text-sm text-[#94A3B8]">{p}</p></div>)}
-                {"exercise" in lesson && <div className="rounded-xl border border-teal-500/30 bg-teal-500/10 p-4"><p className="mb-1 text-xs font-semibold text-teal-400">Drill</p><p className="text-sm italic text-[#94A3B8]">{(lesson as {exercise:string}).exercise}</p></div>}
-                {"elements" in lesson && <div className="grid gap-2 sm:grid-cols-2">{(lesson as {elements:{name:string;desc:string}[]}).elements.map((el) => <div key={el.name} className="rounded-xl border border-[#1E293B] bg-[#0A0F1E] p-3"><p className="mb-0.5 text-sm font-semibold text-teal-400">{el.name}</p><p className="text-xs text-[#94A3B8]">{el.desc}</p></div>)}</div>}
-                {"structure" in lesson && (lesson as {structure:{part:string;desc:string}[]}).structure.map((s, idx) => <div key={idx} className="flex gap-3"><span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-teal-500/20 text-xs font-bold text-teal-400">{idx+1}</span><div><p className="text-sm font-semibold text-[#F1F5F9]">{s.part}</p><p className="text-xs text-[#94A3B8]">{s.desc}</p></div></div>)}
-                {"tips" in lesson && (lesson as {tips:string[]}).tips.map((t, idx) => <div key={idx} className="flex gap-2"><ArrowRight size={14} className="mt-0.5 shrink-0 text-teal-400" /><p className="text-sm text-[#94A3B8]">{t}</p></div>)}
-                {"strategies" in lesson && (lesson as {strategies:string[]}).strategies.map((s, idx) => <div key={idx} className="flex gap-2"><ArrowRight size={14} className="mt-0.5 shrink-0 text-teal-400" /><p className="text-sm text-[#94A3B8]">{s}</p></div>)}
-                {"formula" in lesson && (lesson as {formula:string[]}).formula.map((f, idx) => <div key={idx} className="flex gap-3"><span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-teal-500/20 text-xs font-bold text-teal-400">{idx+1}</span><p className="text-sm text-[#94A3B8]">{f}</p></div>)}
-                <div className="rounded-xl border border-teal-500/30 bg-teal-500/10 px-4 py-3"><div className="flex gap-2"><Lightbulb size={14} className="mt-0.5 shrink-0 text-teal-400" /><p className="text-sm font-medium text-[#F1F5F9]">{lesson.takeaway}</p></div></div>
+              <div className="border-t border-ink/10 px-5 pb-5 pt-4 space-y-4">
+                <p className="text-sm leading-relaxed text-ink-soft">{lesson.concept}</p>
+                {"points" in lesson && (lesson as {points:string[]}).points.map((p, idx) => <div key={idx} className="flex gap-2"><ArrowRight size={14} className="mt-0.5 shrink-0 text-maroon" /><p className="text-sm text-ink-soft">{p}</p></div>)}
+                {"exercise" in lesson && <div className="rounded-md border border-maroon/30 bg-maroon/10 p-4"><p className="mb-1 text-xs font-semibold text-maroon">Drill</p><p className="text-sm italic text-ink-soft">{(lesson as {exercise:string}).exercise}</p></div>}
+                {"elements" in lesson && <div className="grid gap-2 sm:grid-cols-2">{(lesson as {elements:{name:string;desc:string}[]}).elements.map((el) => <div key={el.name} className="rounded-md border border-ink/10 bg-paper-dim p-3"><p className="mb-0.5 text-sm font-semibold text-maroon">{el.name}</p><p className="text-xs text-ink-soft">{el.desc}</p></div>)}</div>}
+                {"structure" in lesson && (lesson as {structure:{part:string;desc:string}[]}).structure.map((s, idx) => <div key={idx} className="flex gap-3"><span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-maroon/15 text-xs font-bold text-maroon">{idx+1}</span><div><p className="text-sm font-semibold text-ink">{s.part}</p><p className="text-xs text-ink-soft">{s.desc}</p></div></div>)}
+                {"tips" in lesson && (lesson as {tips:string[]}).tips.map((t, idx) => <div key={idx} className="flex gap-2"><ArrowRight size={14} className="mt-0.5 shrink-0 text-maroon" /><p className="text-sm text-ink-soft">{t}</p></div>)}
+                {"strategies" in lesson && (lesson as {strategies:string[]}).strategies.map((s, idx) => <div key={idx} className="flex gap-2"><ArrowRight size={14} className="mt-0.5 shrink-0 text-maroon" /><p className="text-sm text-ink-soft">{s}</p></div>)}
+                {"formula" in lesson && (lesson as {formula:string[]}).formula.map((f, idx) => <div key={idx} className="flex gap-3"><span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-maroon/15 text-xs font-bold text-maroon">{idx+1}</span><p className="text-sm text-ink-soft">{f}</p></div>)}
+                <div className="rounded-md border border-maroon/30 bg-maroon/10 px-4 py-3"><div className="flex gap-2"><Lightbulb size={14} className="mt-0.5 shrink-0 text-maroon" /><p className="text-sm font-medium text-ink">{lesson.takeaway}</p></div></div>
               </div>
             )}
           </div>
