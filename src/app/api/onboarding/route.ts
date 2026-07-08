@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { anthropic } from "@/lib/anthropic";
+import { getModel, parseJSON } from "@/lib/gemini";
 import type { OnboardingProfile } from "@/lib/types";
 
 export async function POST(req: NextRequest) {
@@ -10,7 +10,6 @@ export async function POST(req: NextRequest) {
     "model-un": "Model UN",
     "public-speaking": "Public Speaking & Coaching",
   };
-
   const goalLabel: Record<string, string> = {
     competition: "Competition Preparation",
     class: "School / Class Requirement",
@@ -21,14 +20,12 @@ export async function POST(req: NextRequest) {
   const focusNames = (focus as string[]).map((f) => focusLabel[f] ?? f).join(", ");
   const goalName = goalLabel[goal] ?? goal;
 
-  const message = await anthropic.messages.create({
-    model: "claude-opus-4-8",
-    max_tokens: 1024,
-    system: `You are an expert debate coach and public speaking instructor. Always respond with valid JSON only — no markdown, no explanation, no code fences.`,
-    messages: [
-      {
-        role: "user",
-        content: `Build a personalized learning profile for this student.
+  const model = getModel(
+    "You are an expert debate coach and public speaking instructor building a personalized learning profile for a new student. Always respond with valid JSON only — no markdown, no code fences."
+  );
+
+  const result = await model.generateContent(
+    `Build a personalized learning profile for this student.
 
 Student Survey:
 - Name: ${name}
@@ -48,18 +45,9 @@ Return a JSON object with exactly these fields:
   "personalizedInsights": ["insight1", "insight2"],
   "firstChallengeTitle": "A catchy challenge title",
   "firstChallengeDescription": "What the first challenge involves (1 sentence)"
-}
+}`
+  );
 
-Be specific and match the tone to their level — simple and energetic for beginners, technical and strategic for advanced students.`,
-      },
-    ],
-  });
-
-  const textBlock = message.content.find((b) => b.type === "text");
-  if (!textBlock || textBlock.type !== "text") {
-    return NextResponse.json({ error: "No profile generated" }, { status: 500 });
-  }
-
-  const profile: OnboardingProfile = JSON.parse(textBlock.text);
+  const profile = parseJSON<OnboardingProfile>(result.response.text());
   return NextResponse.json(profile);
 }

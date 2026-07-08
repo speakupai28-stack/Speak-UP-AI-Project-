@@ -1,0 +1,368 @@
+SpeakUP AI — Full Project Overview
+=====================================
+Last updated: 2026-06-23
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+WHAT IS SPEAKUP AI?
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+SpeakUP AI is a personalized coaching platform for high school and college
+students learning debate, Model UN, and public speaking. Students complete a
+short onboarding survey and receive a custom learning plan built around their
+goals and experience level. The AI is hidden from the user — it presents
+itself as a personal coaching platform, not an AI product.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+TECH STACK
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Framework:      Next.js 16 (App Router)
+Language:       TypeScript
+Styling:        Tailwind CSS v4
+AI Provider:    Google Gemini (gemini-1.5-pro via @google/generative-ai)
+Icons:          Lucide React
+State:          localStorage (no database yet)
+Hosting:        Local dev (Vercel-ready)
+Repo:           https://github.com/speakupai28-stack/Speak-UP-AI-Project-
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+DESIGN SYSTEM
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Theme:          Dark (deep navy #0A0F1E background)
+Primary:        Indigo #6366F1
+Accent:         Amber #F59E0B
+Surface:        #111827 / #1a2236
+Text:           #F1F5F9 (primary) / #94A3B8 (muted)
+Border:         #1E293B
+Font:           Inter (Google Fonts)
+Components:     glass-card, card-hover, text-gradient, animate-fade-in-up,
+                animate-pulse-glow (all defined in globals.css)
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+FILE STRUCTURE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+speakup-ai/
+├── blueprints/                         ← Planning docs (not user-facing)
+│   ├── project-overview.txt            ← This file
+│   ├── master-features-blueprint.txt   ← All features with status
+│   ├── debate-training-structure.txt   ← Debate curriculum plan
+│   ├── model-un-training-structure.txt ← Model UN curriculum plan
+│   └── public-speaking-structure.txt   ← Public Speaking curriculum plan
+│
+├── src/
+│   ├── lib/
+│   │   ├── gemini.ts          ← Gemini client + parseJSON helper
+│   │   ├── curriculum.ts      ← Full app curriculum map (injected into AI)
+│   │   ├── types.ts           ← All shared TypeScript interfaces
+│   │   ├── progress.ts        ← Debate XP/progression utility
+│   │   └── speakingProgress.ts ← Speaking XP/progression utility
+│   │
+│   ├── components/
+│   │   ├── Navbar.tsx         ← Sticky nav: Home/Debate/Model UN/Speaking/Coach
+│   │   ├── Dashboard.tsx      ← Personalized dashboard (reads localStorage)
+│   │   ├── Coach.tsx          ← Personalized chat coach
+│   │   ├── DebateHub.tsx      ← Debate level selector
+│   │   ├── ModelUNHub.tsx     ← Model UN section selector
+│   │   ├── ModelUNIntro.tsx   ← MUN Section 1 lessons
+│   │   ├── ModelUNResearch.tsx ← MUN Section 3 research tool
+│   │   ├── debate/
+│   │   │   ├── DebateArena.tsx     ← Tabbed shell for all debate features
+│   │   │   ├── ProgressBar.tsx     ← XP bar + AI advancement modal
+│   │   │   ├── Level1.tsx          ← 8 Foundation lessons
+│   │   │   ├── Level2.tsx          ← 8 Strategy lessons
+│   │   │   ├── Level3.tsx          ← 7 Competition lessons
+│   │   │   ├── SparringPartner.tsx ← Real-time AI debate + Judge Mode
+│   │   │   ├── RebuttalTrainer.tsx ← Timed rebuttal challenge
+│   │   │   ├── CaseBuilder.tsx     ← AI case generator
+│   │   │   ├── SpeechFeedback.tsx  ← 6-area speech analysis
+│   │   │   └── WeaknessDetector.tsx ← Pattern tracker + drills
+│   │   └── speaking/
+│   │       ├── SpeakingHub.tsx      ← Speaking level selector
+│   │       ├── SpeakingArena.tsx    ← Tabbed shell for all speaking features
+│   │       ├── ProgressBar.tsx      ← Speaking XP bar + AI advancement
+│   │       ├── Level1.tsx           ← 8 Foundation lessons
+│   │       ├── Level2.tsx           ← 8 Style & Delivery lessons
+│   │       ├── Level3.tsx           ← 8 Performance lessons
+│   │       ├── SpeechUpload.tsx     ← 6-area speech feedback
+│   │       ├── EventPractice.tsx    ← 10 real-world speaking events
+│   │       └── WeaknessDetector.tsx ← Pattern tracker + drills
+│   │
+│   └── app/
+│       ├── page.tsx                 ← Landing page
+│       ├── layout.tsx               ← Root layout with Navbar
+│       ├── globals.css              ← Design system + animations
+│       ├── onboarding/page.tsx      ← 4-step survey
+│       ├── dashboard/page.tsx       ← Dashboard (wrapper)
+│       ├── coach/page.tsx           ← Coach (wrapper)
+│       ├── debate/
+│       │   ├── page.tsx             ← Debate hub
+│       │   ├── level-1/page.tsx     ← Level 1 arena
+│       │   ├── level-2/page.tsx     ← Level 2 arena
+│       │   └── level-3/page.tsx     ← Level 3 arena
+│       ├── model-un/
+│       │   ├── page.tsx             ← Model UN hub
+│       │   ├── intro/page.tsx       ← Section 1
+│       │   ├── committee/page.tsx   ← Section 2
+│       │   ├── research/page.tsx    ← Section 3 (research tool)
+│       │   └── advanced/page.tsx    ← Section 4
+│       ├── public-speaking/
+│       │   ├── page.tsx             ← Speaking hub
+│       │   ├── level-1/page.tsx     ← Level 1 arena
+│       │   ├── level-2/page.tsx     ← Level 2 arena
+│       │   └── level-3/page.tsx     ← Level 3 arena
+│       └── api/
+│           ├── onboarding/route.ts
+│           ├── coach/route.ts
+│           ├── debate/
+│           │   ├── level-1/route.ts
+│           │   ├── level-2/route.ts
+│           │   ├── level-3/route.ts
+│           │   ├── progress/route.ts
+│           │   ├── sparring/route.ts
+│           │   ├── rebuttal/route.ts
+│           │   ├── case-builder/route.ts
+│           │   ├── speech-feedback/route.ts
+│           │   └── judge/route.ts
+│           ├── model-un/
+│           │   ├── research/route.ts
+│           │   └── committee/route.ts
+│           └── public-speaking/
+│               ├── feedback/route.ts
+│               ├── event/route.ts
+│               └── progress/route.ts
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+EVERY PAGE & WHAT IT DOES
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+/                       Landing page
+                        Hero, 3 feature cards (Debate/MUN/Speaking),
+                        How it works (3 steps), CTA to onboarding
+
+/onboarding             4-step survey
+                        Step 1: Name
+                        Step 2: Experience (Beginner/Intermediate/Advanced)
+                        Step 3: Focus areas (Debate/Model UN/Speaking — multi-select)
+                        Step 4: Main goal (Competition/Class/Improvement/Explore)
+                        → Gemini analyzes and returns personalized profile
+                        → Saves to localStorage as "speakup_user"
+                        → Completion screen shows AI greeting, tagline, coaching
+                          style, top 3 skills, first challenge, 2 insights
+
+/dashboard              Personalized dashboard
+                        Reads "speakup_user" from localStorage
+                        Shows: welcome + experience badge + AI tagline
+                        Stats row: sessions / streak / skills / challenges
+                        Your coach message + weekly goal
+                        Focus area cards (links to their chosen sections)
+                        Explore more (other sections, dimmed)
+                        Sidebar: first challenge, skills to build, insights,
+                                 recommended start
+
+/debate                 Debate hub
+                        3 level cards with full curriculum breakdown
+                        Recommends level based on onboarding experience
+                        Each card shows: who it's for, goal, 8 topics, coach style
+
+/debate/level-1         Debate Arena — Foundations
+/debate/level-2         Debate Arena — Strategy
+/debate/level-3         Debate Arena — Competition
+                        All three share the same DebateArena shell with:
+                        - Progress bar (XP + AI level evaluation)
+                        - 6 tabs:
+                          [Lessons] [Sparring] [Rebuttal] [Case Builder] [Speech] [Weaknesses]
+
+/model-un               Model UN hub
+                        4 section cards — all live
+                        Recommends section based on experience
+
+/model-un/intro         Section 1: Introduction to MUN
+                        5 accordion lessons: what is MUN, committee types,
+                        rules of procedure, resolution anatomy, delegate role
+
+/model-un/committee     Section 2: Committee Work & Speeches
+                        5 accordion lessons + speech practice form
+                        AI feedback on country representation + speech quality
+
+/model-un/research      Section 3: Research & Position Papers
+                        Smart Research Assistant form:
+                        Country / Committee / Topic / Historical Stance /
+                        Bloc / Speaker Position
+                        AI returns: research roadmap / key sources /
+                        allies & adversaries / talking points /
+                        position paper tips / smart research strategies
+
+/model-un/advanced      Section 4: Advanced Delegate Skills
+                        5 accordion lessons: crisis committees, directives,
+                        chairing, advanced negotiation, best delegate strategies
+
+/public-speaking        Public Speaking hub
+                        3 level cards with full curriculum breakdown
+
+/public-speaking/level-1  Speaking Arena — Foundations
+/public-speaking/level-2  Speaking Arena — Style & Delivery
+/public-speaking/level-3  Speaking Arena — Performance
+                          All three share SpeakingArena shell with:
+                          - Progress bar (XP + AI level evaluation)
+                          - 4 tabs:
+                            [Lessons] [Speech Feedback] [Events] [Weaknesses]
+
+/coach                  Personalized AI Coach (chat)
+                        Reads full onboarding profile from localStorage
+                        Knows entire app curriculum (via CURRICULUM_MAP)
+                        Only coaches student's chosen focus areas
+                        Tone calibrated to their experience level
+                        Starter prompts pulled from their specific focus areas
+                        Can reference specific lessons, features, and URLs
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+AI FEATURES DETAIL
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+DEBATE FEATURES (inside DebateArena tabs):
+
+Sparring Partner
+  - Student picks motion and side (AFF/NEG)
+  - AI plays the opposing side in real-time chat
+  - Fires POIs, attacks weak points, stays in character
+  - Level 1: friendly / Level 2: strategic / Level 3: relentless
+  - After 3+ exchanges: gavel icon triggers AI Judge Ballot
+  - Judge Ballot: winner, score/100, reasoning, clash analysis,
+    impact weighing, main improvement
+  - Session recorded to progress tracker
+
+Rebuttal Trainer
+  - Random argument appears (level-appropriate topics)
+  - 90-second countdown timer
+  - 3 rebuttal text inputs
+  - AI grades each rebuttal individually + gives improved version
+  - Returns: overall score, per-rebuttal score + feedback + rewrite,
+    best rebuttal, biggest weakness, next drill
+  - Session recorded
+
+Case Builder
+  - Student selects motion + side (Proposition/Opposition)
+  - Level-appropriate motion suggestions
+  - AI builds: framing, mechanism, 2-3 arguments (with examples + impacts),
+    weighing statement, full opening speech script
+  - Session recorded
+
+Speech Feedback (6 areas)
+  - Student writes speech for a topic
+  - Speech type selector (Constructive / Rebuttal / Summary / Final Focus)
+  - AI scores each of 6 dimensions: Structure / Argument / Evidence /
+    Rebuttal / Impact / Delivery
+  - Each dimension: score/10 + specific feedback + one tip
+  - Plus: improved paragraph rewrite
+  - Session recorded
+
+Weakness Detector
+  - Reads all session data from localStorage
+  - Surfaces top 3 weaknesses by frequency
+  - Each weakness gets a targeted drill
+  - Shows recent sessions with scores
+  - Updates after every session
+
+Progression System
+  - XP earned per session: sparring=25, speech=18, rebuttal=12, case=10
+  - Progress bar fills to 100%
+  - At 100%: Gemini evaluates last 5 sessions + top weaknesses
+  - Returns: advance/stay/drop verdict + reasoning + strengths + gaps + next focus
+  - Advance: moves to next level, bar resets
+  - Stay: bar resets at same level
+  - Drop: rare — returns to Level 1
+  - Now knows full curriculum → references specific lessons in feedback
+
+SPEAKING FEATURES (inside SpeakingArena tabs):
+
+Speech Upload (Speech Feedback tab)
+  - Student writes speech for a level-appropriate topic
+  - AI scores: Articulation / Structure / Style / Delivery / Persuasion / Confidence
+  - Each: score/10 + specific feedback + one improvement tip
+  - Plus: improved opening rewrite
+  - Session recorded
+
+Event Practice (10 events)
+  - Student picks event type from 10 options
+  - Tips expand for each event format
+  - AI evaluates at event-specific standard:
+    Self-Introduction: clarity, warmth, memorability (60 sec)
+    Class Presentation: structure, evidence, engagement (3-5 min)
+    Valedictorian Speech: story, inspiration, personal voice (3-4 min)
+    TEDx-Style Talk: big idea, narrative arc, delivery energy (5-7 min)
+    Persuasive Speech: ethos/pathos/logos + call to action (3-5 min)
+    Informative Speech: clarity, organization, audience (3-5 min)
+    Debate Opening Statement: framing, confidence, preview (2-3 min)
+    Model UN Opening Speech: formal language, representation (1-2 min)
+    College Interview Answer: specificity, authenticity (60-90 sec)
+    Elevator Pitch: hook, value prop, close (30-60 sec)
+  - Returns: judge verdict, event-specific feedback, strengths,
+    improvements, opening rewrite, closing rewrite
+  - Session recorded
+
+Weakness Detector (speaking)
+  - Same pattern as debate
+  - Speaking-specific drills (e.g. "replace every 'I think' with a direct statement")
+
+Progression System (speaking)
+  - Same XP and advance/stay/drop system
+  - Now knows full curriculum → references specific lessons in feedback
+
+PERSONALIZED COACH:
+  - Full knowledge of entire app curriculum via CURRICULUM_MAP
+  - Knows student's name, experience, focus areas, goal
+  - Knows their AI-generated coaching style, weekly goal, top skills
+  - Stays in character — only coaches their chosen areas
+  - References specific sections, lessons, and features by name
+  - Tone calibrated: beginner=encouraging, intermediate=challenging, advanced=demanding
+  - Example starter prompt responses that reference real features
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+WHAT IS NOT YET BUILT
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+1. User Authentication (Clerk) — required for paid version
+   Progress and profiles currently live in localStorage only
+
+2. Database (Supabase) — required for paid version
+   No persistent server-side storage yet
+
+3. Stripe Payments — not started
+   Pricing: Free (3 sessions/month) / Pro $9.99/mo / School $29.99/mo
+
+4. Usage Limits — not started
+   No paywall or session counting system
+
+5. Model UN Simulator — planned
+   Full committee simulation with AI playing multiple delegates
+
+6. Articulation Drill — planned
+   Timed speaking drill for Level 1 students
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+USER FLOW (happy path)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+1. User lands on /
+2. Clicks "Get Started" → /onboarding
+3. Completes 4-step survey
+4. Gemini analyzes → personalized completion screen
+5. "Start My Journey" → /dashboard
+6. Dashboard shows personalized profile + section cards
+7. Clicks into Debate / Model UN / Public Speaking
+8. Works through lessons and practice features
+9. XP accumulates → Gemini evaluates → level advances
+10. Returns to /coach for personalized chat guidance
+    Coach knows their profile + entire curriculum
+    → directs them to specific features and lessons
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+GIT HISTORY
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Commit 1 (a458c2c): Initial Create Next App commit
+Commit 2 (53913f8): Build complete SpeakUP AI platform draft
+Commit 3 (e780546): Add debate progression, public speaking, personalized coach
+Commit 4 (pending): Switch to Gemini API + full curriculum awareness

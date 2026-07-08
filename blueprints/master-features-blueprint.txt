@@ -1,0 +1,355 @@
+SpeakUP AI — Master Features Blueprint
+========================================
+Last updated: 2026-06-23
+Status key: ✅ BUILT | 🔄 PARTIAL | ❌ NOT BUILT
+
+═══════════════════════════════════════════════════════
+SECTION 1 — ONBOARDING & PROFILE
+═══════════════════════════════════════════════════════
+
+[✅] 1.1 — Onboarding Survey
+  What: 4-step survey collecting name, experience, focus areas, goal
+  How: Multi-step form at /onboarding
+  AI: Claude analyzes results → generates personalized profile (greeting,
+      tagline, coaching style, weekly goal, top skills, first challenge,
+      personalized insights)
+  Storage: localStorage under "speakup_user"
+  Files: src/app/onboarding/page.tsx
+         src/app/api/onboarding/route.ts
+
+[✅] 1.2 — Personalized Dashboard
+  What: Dashboard that reads AI profile and shows personalized content
+  How: Reads localStorage profile → shows focus area cards, coach message,
+       weekly goal, skills to build, first challenge, stats
+  Files: src/components/Dashboard.tsx
+         src/app/dashboard/page.tsx
+
+[❌] 1.3 — User Accounts & Authentication
+  What: Real accounts so users keep progress across devices
+  Why: Currently everything lives in localStorage — lost if browser cleared
+  How to build:
+    - Use Clerk (fastest) or Supabase Auth
+    - Replace localStorage with database calls
+    - Onboarding saves to DB instead of localStorage
+    - Progress (XP, sessions, weaknesses) tied to user ID
+  Needs: clerk or @supabase/supabase-js package
+  Priority: HIGH — required for paid version
+
+
+═══════════════════════════════════════════════════════
+SECTION 2 — DEBATE AI
+═══════════════════════════════════════════════════════
+
+[✅] 2.1 — Debate Hub (3 Levels)
+  What: Level selector showing Foundations, Strategy, Competition
+  How: Recommends level based on onboarding experience
+  Files: src/components/DebateHub.tsx, src/app/debate/page.tsx
+
+[✅] 2.2 — Progression System
+  What: AI decides whether student advances, stays, or drops between levels
+  How: XP earned per session → at 100% Claude evaluates → advance/stay/drop
+  XP rates: Sparring=25, Speech=18, Rebuttal=12, Case Builder=10
+  Level rules: Beginner starts L1, Intermediate L2, Advanced L3
+               Drop to L1 only if fundamental misunderstanding shown
+  Files: src/lib/progress.ts
+         src/components/debate/ProgressBar.tsx
+         src/app/api/debate/progress/route.ts
+
+[✅] 2.3 — Level 1: Foundations Lessons
+  What: 8 lessons — debate types, CWI model, Aff/Neg + Pro/Con,
+        flowing, cross-ex, rebuttals, round structure (PF/LD/Policy), practice
+  Files: src/components/debate/Level1.tsx
+
+[✅] 2.4 — Level 2: Strategy Lessons
+  What: 8 lessons — turns, offensive/defensive strategy, reading the flow,
+        advanced CX, block files, time allocation, off-case, practice
+  Files: src/components/debate/Level2.tsx
+
+[✅] 2.5 — Level 3: Competition Lessons
+  What: 7 lessons — tournament structure, judge adaptation, theory,
+        K debate, speed/clarity, elim pressure, post-round analysis
+  Files: src/components/debate/Level3.tsx
+
+[✅] 2.6 — AI Sparring Partner
+  What: Real-time debate against AI opponent
+  How: Chat interface — AI plays opposition, fires POIs, attacks weak points
+       Level-aware: friendly (L1), strategic (L2), relentless (L3)
+       After 3 exchanges, student can request Judge Ballot
+  Files: src/components/debate/SparringPartner.tsx
+         src/app/api/debate/sparring/route.ts
+
+[✅] 2.7 — Speech Upload + AI Feedback (6 areas)
+  What: Student writes speech → gets feedback across 6 dimensions
+  Areas: Structure, Argument, Evidence, Rebuttal, Impact, Delivery
+  Level-aware: beginner lens / intermediate standard / competition standard
+  Files: src/components/debate/SpeechFeedback.tsx
+         src/app/api/debate/speech-feedback/route.ts
+
+[✅] 2.8 — Weakness Detector
+  What: Tracks weakness patterns across all sessions
+  How: After each session, weakness label saved → aggregated over time
+       Shows top 3 weaknesses + specific drills to fix each
+  Files: src/components/debate/WeaknessDetector.tsx
+         (data stored via src/lib/progress.ts)
+
+[✅] 2.9 — Rebuttal Trainer
+  What: Timed challenge — AI gives argument, student rebuts in 90 seconds
+  How: 3 rebuttal inputs, countdown timer, AI grades each rebuttal
+       Level-aware topics and grading standards
+  Files: src/components/debate/RebuttalTrainer.tsx
+         src/app/api/debate/rebuttal/route.ts
+
+[✅] 2.10 — Case Builder
+  What: Student enters motion + side → AI builds complete debate case
+  Output: Framing, Mechanism, 2-3 Arguments, Examples, Impacts,
+          Weighing, Opening Speech Script
+  Level-aware: simple (L1), strategic (L2), competition-level (L3)
+  Files: src/components/debate/CaseBuilder.tsx
+         src/app/api/debate/case-builder/route.ts
+
+[✅] 2.11 — AI Judge Mode
+  What: After sparring session, AI renders a judge ballot
+  Output: Winner, Score/100, Reasoning, Clash Analysis,
+          Impact Weighing, Main Improvement
+  Level-aware: beginner criteria / intermediate / competition standard
+  Files: (built into SparringPartner.tsx)
+         src/app/api/debate/judge/route.ts
+
+[✅] 2.12 — Debate Arena (Tabbed Shell)
+  What: Unified tabbed interface wrapping all debate features per level
+  Tabs: Lessons | Sparring | Rebuttal | Case Builder | Speech | Weaknesses
+  Files: src/components/debate/DebateArena.tsx
+
+
+═══════════════════════════════════════════════════════
+SECTION 3 — MODEL UN
+═══════════════════════════════════════════════════════
+
+[✅] 3.1 — Model UN Hub
+  What: Hub page showing all 4 sections, live/coming-soon status
+  Files: src/components/ModelUNHub.tsx, src/app/model-un/page.tsx
+
+[✅] 3.2 — Section 1: Introduction to Model UN
+  What: 5 lessons — what is MUN, committee types, rules of procedure,
+        resolution anatomy, delegate role
+  Files: src/components/ModelUNIntro.tsx
+         src/app/model-un/intro/page.tsx
+
+[✅] 3.3 — Section 2: Committee Work & Speeches
+  What: 5 lessons — opening speech structure, lobbying/blocs,
+        working papers, points of information, voting
+  Practice: Write a speech for your country/topic → AI feedback
+  Files: src/app/model-un/committee/page.tsx
+         src/app/api/model-un/committee/route.ts
+
+[✅] 3.4 — Section 3: Research & Position Papers
+  What: Smart Research Assistant
+  Inputs: Country, Committee, Topic, Historical Stance (student writes
+          everything they already know), Bloc, Speaker Position
+  Output: Research roadmap (5 steps), key sources, allies/adversaries,
+          talking points, position paper tips, smart research strategies
+  Files: src/components/ModelUNResearch.tsx
+         src/app/model-un/research/page.tsx
+         src/app/api/model-un/research/route.ts
+
+[✅] 3.5 — Section 4: Advanced Delegate Skills
+  What: 5 lessons — crisis committees, directives/press releases,
+        chairing, advanced negotiation, best delegate strategies
+  Files: src/app/model-un/advanced/page.tsx
+
+[❌] 3.6 — Model UN Simulator
+  What: Full committee simulation (folder exists, not built)
+  Planned: AI plays multiple delegates in committee
+           Student delivers speeches, AI responds as other countries
+           Motion system, voting, full MUN round simulation
+  Files needed: src/app/model-un/simulator/page.tsx
+                src/app/api/model-un/simulator/route.ts
+  Priority: MEDIUM
+
+
+═══════════════════════════════════════════════════════
+SECTION 4 — PUBLIC SPEAKING
+═══════════════════════════════════════════════════════
+
+[✅] 4.1 — Public Speaking Hub
+  What: Level selector for 3 levels, recommends based on profile
+  Files: src/components/speaking/SpeakingHub.tsx
+         src/app/public-speaking/page.tsx
+
+[✅] 4.2 — Progression System (Public Speaking)
+  What: Same AI-driven XP + advance/stay/drop as Debate
+  XP rates: Upload=20, Event=15, Articulation=10
+  Files: src/lib/speakingProgress.ts
+         src/components/speaking/ProgressBar.tsx
+         src/app/api/public-speaking/progress/route.ts
+
+[✅] 4.3 — Level 1: Foundations Lessons
+  What: 8 lessons — why speaking matters, articulation basics,
+        vocal variety, speech structure, body language,
+        overcoming nerves, 1-minute rule, practice
+  Files: src/components/speaking/Level1.tsx
+
+[✅] 4.4 — Level 2: Style & Delivery Lessons
+  What: 8 lessons — finding your voice, advanced articulation,
+        storytelling structure, ethos/pathos/logos, audience
+        management, advanced body language, power of pause, practice
+  Files: src/components/speaking/Level2.tsx
+
+[✅] 4.5 — Level 3: Performance & Events Lessons
+  What: 8 lessons — adapting to contexts, event-specific mastery,
+        advanced persuasion, Q&A handling, pressure performance,
+        vocal stamina, first 10 seconds, practice
+  Files: src/components/speaking/Level3.tsx
+
+[✅] 4.6 — Speech Upload + AI Feedback (6 areas)
+  What: Student writes speech → feedback on 6 dimensions
+  Areas: Articulation, Structure, Style, Delivery, Persuasion, Confidence
+  Level-aware coaching lens
+  Files: src/components/speaking/SpeechUpload.tsx
+         src/app/api/public-speaking/feedback/route.ts
+
+[✅] 4.7 — Event Practice (10 Events)
+  What: Student picks real-world event → writes speech → judge feedback
+  Events: Self-Introduction, Class Presentation, Valedictorian,
+          TEDx-Style Talk, Persuasive Speech, Informative Speech,
+          Debate Opening, Model UN Opening, College Interview, Elevator Pitch
+  Files: src/components/speaking/EventPractice.tsx
+         src/app/api/public-speaking/event/route.ts
+
+[✅] 4.8 — Weakness Detector (Public Speaking)
+  What: Tracks weakness patterns + gives specific drills
+  Files: src/components/speaking/WeaknessDetector.tsx
+
+[❌] 4.9 — Articulation Drill
+  What: Timed articulation challenge
+  How: AI gives a tongue twister or articulation exercise
+       Student types it back clearly in 30 seconds
+       AI checks for clarity, rhythm, difficult sound combinations
+  Files needed: src/components/speaking/ArticulationDrill.tsx
+                src/app/api/public-speaking/articulation/route.ts
+  Priority: LOW — nice-to-have for Level 1 students
+
+
+═══════════════════════════════════════════════════════
+SECTION 5 — AI COACH
+═══════════════════════════════════════════════════════
+
+[✅] 5.1 — Personalized Chat Coach
+  What: Chat interface where AI knows the student's full profile
+  How: Reads onboarding data (name, experience, focus areas, goal,
+       AI-generated coaching style, weekly goal, insights)
+  Behavior: Only coaches their chosen areas (debate/MUN/speaking)
+            Adjusts tone by level, remembers conversation history
+            Shows starter prompts based on their focus areas
+            Quick links to their practice sections
+  Files: src/components/Coach.tsx
+         src/app/api/coach/route.ts
+         src/app/coach/page.tsx
+
+
+═══════════════════════════════════════════════════════
+SECTION 6 — MONETIZATION (NOT BUILT)
+═══════════════════════════════════════════════════════
+
+[❌] 6.1 — User Authentication
+  What: Real accounts (sign up / log in / persist data)
+  Tool: Clerk (recommended — fastest to integrate with Next.js)
+  What changes:
+    - Add ClerkProvider to layout.tsx
+    - Replace localStorage with DB reads/writes
+    - Add /sign-in and /sign-up pages
+    - Protect /dashboard, /debate, /model-un, /public-speaking
+  Files needed: src/middleware.ts
+                src/app/sign-in/page.tsx
+                src/app/sign-up/page.tsx
+  Priority: REQUIRED for paid version
+
+[❌] 6.2 — Database
+  What: Persist user profiles, progress, and session history
+  Tool: Supabase (PostgreSQL — works well with Next.js + Clerk)
+  Tables needed:
+    - users (id, clerk_id, name, experience, focus, goal, profile_json)
+    - debate_progress (user_id, level, xp, sessions_json, weaknesses_json)
+    - speaking_progress (user_id, level, xp, sessions_json, weaknesses_json)
+  Files needed: src/lib/db.ts
+                src/app/api/user/route.ts
+  Priority: REQUIRED for paid version
+
+[❌] 6.3 — Stripe Payments
+  What: Subscription billing for premium access
+  Tool: Stripe + stripe npm package
+  Pricing model discussed:
+    - Free: Onboarding + 3 AI feedback sessions/month
+    - Pro ($9.99/mo): Unlimited feedback across all sections
+    - School ($29.99/mo): Up to 30 students + teacher dashboard
+  What to build:
+    - /pricing page
+    - Stripe checkout session API
+    - Webhook to update user subscription in DB
+    - Usage tracking per user (count API calls)
+    - Paywall middleware: check subscription before AI routes
+  Files needed: src/app/pricing/page.tsx
+                src/app/api/stripe/checkout/route.ts
+                src/app/api/stripe/webhook/route.ts
+                src/lib/stripe.ts
+                src/middleware.ts (update to check subscription)
+  Priority: REQUIRED for paid version
+
+[❌] 6.4 — Usage Limits
+  What: Free users get limited AI sessions, paid users get unlimited
+  How: Middleware checks user's session count before calling Anthropic
+       If over limit → redirect to /pricing
+  Files needed: update all /api/debate/*, /api/public-speaking/*,
+                /api/model-un/*, /api/coach routes
+  Priority: REQUIRED for paid version
+
+
+═══════════════════════════════════════════════════════
+FEATURE PRIORITY QUEUE
+═══════════════════════════════════════════════════════
+
+IMMEDIATE (to complete the core product):
+  1. [❌ 6.1] User Authentication (Clerk)
+  2. [❌ 6.2] Database (Supabase)
+
+NEXT (monetization):
+  3. [❌ 6.3] Stripe Payments
+  4. [❌ 6.4] Usage Limits
+
+LATER (content expansion):
+  5. [❌ 3.6] Model UN Simulator
+  6. [❌ 4.9] Articulation Drill
+
+
+═══════════════════════════════════════════════════════
+WHAT IS FULLY BUILT
+═══════════════════════════════════════════════════════
+
+Landing page                   /
+Onboarding survey + AI         /onboarding
+Dashboard                      /dashboard
+Debate Hub                     /debate
+Debate Level 1 (Foundations)   /debate/level-1
+Debate Level 2 (Strategy)      /debate/level-2
+Debate Level 3 (Competition)   /debate/level-3
+  → Sparring Partner           (tab in arena)
+  → Rebuttal Trainer           (tab in arena)
+  → Case Builder               (tab in arena)
+  → Speech Feedback            (tab in arena)
+  → Weakness Detector          (tab in arena)
+  → AI Judge Mode              (built into sparring)
+  → Progression System         (progress bar + AI eval)
+Model UN Hub                   /model-un
+  → Section 1: Intro           /model-un/intro
+  → Section 2: Committee       /model-un/committee
+  → Section 3: Research        /model-un/research
+  → Section 4: Advanced        /model-un/advanced
+Public Speaking Hub            /public-speaking
+  → Level 1: Foundations       /public-speaking/level-1
+  → Level 2: Style & Delivery  /public-speaking/level-2
+  → Level 3: Performance       /public-speaking/level-3
+  → Speech Upload              (tab in arena)
+  → Event Practice (10 events) (tab in arena)
+  → Weakness Detector          (tab in arena)
+  → Progression System         (progress bar + AI eval)
+AI Coach (personalized chat)   /coach
