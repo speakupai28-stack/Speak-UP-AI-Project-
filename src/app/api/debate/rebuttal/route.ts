@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { auth } from "@/auth";
 import { getModel, parseJSON } from "@/lib/gemini";
 import type { RebuttalResult } from "@/lib/types";
 
@@ -9,6 +10,11 @@ const LEVEL_PERSONA: Record<number, string> = {
 };
 
 export async function POST(req: NextRequest) {
+  const session = await auth();
+  if (!session?.user) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
   const { argument, rebuttals, level } = await req.json();
 
   const model = getModel(

@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { auth } from "@/auth";
 import { getModel, parseJSON } from "@/lib/gemini";
 import type { EventFeedback } from "@/lib/types";
 
@@ -22,6 +23,11 @@ const LEVEL_STANDARD: Record<number, string> = {
 };
 
 export async function POST(req: NextRequest) {
+  const session = await auth();
+  if (!session?.user) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
   const { eventType, speechText, level } = await req.json();
   const criteria = EVENT_CRITERIA[eventType] ?? "overall clarity and impact";
 
