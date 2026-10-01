@@ -1,9 +1,23 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getModel, parseJSON } from "@/lib/gemini";
 import type { OnboardingProfile } from "@/lib/types";
+import { z } from "zod";
+
+// Onboarding runs before the account exists, so this route stays public;
+// the limits just keep a single request from carrying an oversized prompt.
+const surveySchema = z.object({
+  name: z.string().max(200),
+  experience: z.string().max(100),
+  focus: z.array(z.string().max(100)).max(10),
+  goal: z.string().max(100),
+});
 
 export async function POST(req: NextRequest) {
-  const { name, experience, focus, goal } = await req.json();
+  const parsed = surveySchema.safeParse(await req.json().catch(() => null));
+  if (!parsed.success) {
+    return NextResponse.json({ error: "Invalid input" }, { status: 400 });
+  }
+  const { name, experience, focus, goal } = parsed.data;
 
   const focusLabel: Record<string, string> = {
     debate: "Competitive Debate",
