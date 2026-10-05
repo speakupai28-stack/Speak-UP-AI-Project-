@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/auth";
+import { enforceAiLimits } from "@/lib/aiLimits";
 import { getModel, parseJSON } from "@/lib/gemini";
 import type { JudgeBallot } from "@/lib/types";
 
@@ -14,6 +15,8 @@ export async function POST(req: NextRequest) {
   if (!session?.user) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
+  const limited = await enforceAiLimits(req, `user:${session.user.id}`, "debate/judge");
+  if (limited) return limited;
 
   const { motion, propositionSpeeches, oppositionSpeeches, level } = await req.json();
 

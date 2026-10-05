@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/auth";
+import { enforceAiLimits } from "@/lib/aiLimits";
 import { anthropic } from "@/lib/anthropic";
 
 const FOCUS_LABELS: Record<string, string> = {
@@ -20,6 +21,8 @@ export async function POST(req: NextRequest) {
   if (!session?.user) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
+  const limited = await enforceAiLimits(req, `user:${session.user.id}`, "coach");
+  if (limited) return limited;
 
   const { messages, profile } = await req.json();
 

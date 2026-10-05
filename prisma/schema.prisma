@@ -185,3 +185,14 @@ model Subscription {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
+
+// One row per AI request, used for rate limiting (see src/lib/aiLimits.ts).
+// key is "user:<id>" for logged-in routes or "ip:<address>" for onboarding.
+model AiUsage {
+  id        String   @id @default(cuid())
+  key       String
+  route     String
+  createdAt DateTime @default(now())
+
+  @@index([key, createdAt])
+}

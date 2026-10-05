@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getModel, parseJSON } from "@/lib/gemini";
 import type { OnboardingProfile } from "@/lib/types";
 import { z } from "zod";
+import { clientIp, enforceAiLimits, ONBOARDING_LIMITS } from "@/lib/aiLimits";
 
 // Onboarding runs before the account exists, so this route stays public;
 // the limits just keep a single request from carrying an oversized prompt.
@@ -13,6 +14,9 @@ const surveySchema = z.object({
 });
 
 export async function POST(req: NextRequest) {
+  const limited = await enforceAiLimits(req, `ip:${clientIp(req)}`, "onboarding", ONBOARDING_LIMITS);
+  if (limited) return limited;
+
   const parsed = surveySchema.safeParse(await req.json().catch(() => null));
   if (!parsed.success) {
     return NextResponse.json({ error: "Invalid input" }, { status: 400 });
