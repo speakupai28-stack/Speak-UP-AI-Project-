@@ -41,10 +41,23 @@ export async function takeRequest(
 /**
  * True when the request body is bigger than maxBytes. The Content-Length header
  * can be missing (chunked uploads) or wrong, so the body itself is measured; clone()
- * leaves the original body for the route's own req.json().
+ * leaves the original body for the route's own req.json(). Reading stops as soon as
+ * the limit is passed, so a huge or endless upload never gets buffered in full.
  */
 export async function bodyTooLarge(req: Request, maxBytes: number): Promise<boolean> {
   if (Number(req.headers.get("content-length") ?? 0) > maxBytes) return true;
-  const body = await req.clone().arrayBuffer();
-  return body.byteLength > maxBytes;
+  const reader = req.clone().body?.getReader();
+  if (!reader) return false;
+  let size = 0;
+  for (;;) {
+    const { done, value } = await reader.read();
+    if (done) return false;
+    size += value.byteLength;
+    if (size > maxBytes) {
+      // Not awaited: cancelling one branch of a cloned body only settles once the
+      // other branch is cancelled too, which the route never does.
+      reader.cancel().catch(() => {});
+      return true;
+    }
+  }
 }
