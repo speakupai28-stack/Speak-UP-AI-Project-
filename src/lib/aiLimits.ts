@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { takeRequest, type RateLimitRule, type UsageStore } from "@/lib/rateLimit";
+import { bodyTooLarge, takeRequest, type RateLimitRule, type UsageStore } from "@/lib/rateLimit";
 
 const MINUTE = 60_000;
 
@@ -18,8 +18,10 @@ const MAX_BODY_BYTES = 64 * 1024;
 
 const store: UsageStore = {
   countSince: (key, since) => prisma.aiUsage.count({ where: { key, createdAt: { gte: since } } }),
-  record: async (key, route, at) => {
-    await prisma.aiUsage.create({ data: { key, route, createdAt: at } });
+  record: async (key, route, at) =>
+    (await prisma.aiUsage.create({ data: { key, route, createdAt: at }, select: { id: true } })).id,
+  remove: async (id) => {
+    await prisma.aiUsage.deleteMany({ where: { id } });
   },
 };
 
@@ -30,7 +32,7 @@ export async function enforceAiLimits(
   route: string,
   rules: RateLimitRule[] = USER_LIMITS,
 ): Promise<NextResponse | null> {
-  if (Number(req.headers.get("content-length") ?? 0) > MAX_BODY_BYTES) {
+  if (await bodyTooLarge(req, MAX_BODY_BYTES)) {
     return NextResponse.json({ error: "Request too large" }, { status: 413 });
   }
   try {

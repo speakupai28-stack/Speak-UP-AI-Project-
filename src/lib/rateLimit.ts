@@ -8,12 +8,18 @@ export interface RateLimitRule {
 
 export interface UsageStore {
   countSince(key: string, since: Date): Promise<number>;
-  record(key: string, route: string, at: Date): Promise<void>;
+  /** Saves one request and returns its id. */
+  record(key: string, route: string, at: Date): Promise<string>;
+  remove(id: string): Promise<void>;
 }
 
 export type RateLimitResult = { ok: true } | { ok: false; retryAfterSeconds: number };
 
-/** Records the request if every rule still has room; refused requests aren't recorded. */
+/**
+ * Records the request first and then counts, so requests that arrive at the same
+ * moment all see each other and can't slip past the limit together. If any rule is
+ * over, the record is removed again, so refused requests don't use up the window.
+ */
 export async function takeRequest(
   store: UsageStore,
   key: string,
@@ -21,12 +27,24 @@ export async function takeRequest(
   rules: RateLimitRule[],
   now: Date = new Date(),
 ): Promise<RateLimitResult> {
+  const id = await store.record(key, route, now);
   for (const rule of rules) {
     const used = await store.countSince(key, new Date(now.getTime() - rule.windowMs));
-    if (used >= rule.limit) {
+    if (used > rule.limit) {
+      await store.remove(id);
       return { ok: false, retryAfterSeconds: Math.ceil(rule.windowMs / 1000) };
     }
   }
-  await store.record(key, route, now);
   return { ok: true };
+}
+
+/**
+ * True when the request body is bigger than maxBytes. The Content-Length header
+ * can be missing (chunked uploads) or wrong, so the body itself is measured; clone()
+ * leaves the original body for the route's own req.json().
+ */
+export async function bodyTooLarge(req: Request, maxBytes: number): Promise<boolean> {
+  if (Number(req.headers.get("content-length") ?? 0) > maxBytes) return true;
+  const body = await req.clone().arrayBuffer();
+  return body.byteLength > maxBytes;
 }
